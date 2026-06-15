@@ -6,16 +6,25 @@
     {
       "layers" : [
         {
-          "blend-mode" : "normal",
           "glass" : true,
-          "hidden" : false,
-          "image-name" : "Untitled 4.svg",
-          "name" : "Untitled 4",
+          "image-name" : "HomePlus-roof.svg",
+          "name" : "HomePlus-roof",
           "position" : {
-            "scale" : 0.5,
+            "scale" : 0.45,
             "translation-in-points" : [
-              0.000610499999993408,
-              -0.11672950000001947
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "image-name" : "HomePlus-bottom.svg",
+          "name" : "HomePlus-bottom",
+          "position" : {
+            "scale" : 0.45,
+            "translation-in-points" : [
+              0,
+              0
             ]
           }
         }
