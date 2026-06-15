@@ -4,15 +4,18 @@
 //
 //  Created by Brandon Thomas on 6/13/26.
 //
+// https://developer.apple.com/documentation/testing
+//
 
 import Testing
+@testable import HomePlus
 
 struct HomePlusTests {
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-        // Swift Testing Documentation
-        // https://developer.apple.com/documentation/testing
+    @Test func doesServiceCapabilitiesHydrateDefaults() async throws {
+        let capabilities = ServiceCapabilities(supportsPower: true)
+        
+        #expect(capabilities.supportsPower)
+        #expect(!capabilities.supportsBrightness)
     }
-
 }
