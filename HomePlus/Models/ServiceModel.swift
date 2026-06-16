@@ -16,6 +16,18 @@ enum ServiceKind: Equatable {
     case garageDoor
     case lock
     case thermostat
+    case door
+    case window
+    case fan
+    case humidifierDehumidifier
+    case airPurifier
+    case valve
+    case faucet
+    case slat
+    case securitySystem
+    /// Temperature/humidity/motion/contact/leak/smoke/CO/CO2/occupancy can all start as
+    ///  read-only sensor rows; could split sensor into temperatureSensor, humiditySensor, motionSensor
+    ///  in the future
     case sensor
     case unsupported(String)
 }
@@ -41,7 +53,8 @@ struct ServiceValues: Equatable {
 }
 
 /// Mapping for HMService (a capability exposed by an HMAccessory)
-/// Most user-facing interactable UI elements will be services
+/// Most user-facing interactable UI elements will be services; therefore this is mostly
+///  used for direct UI interactions
 struct ServiceModel: Identifiable, Equatable {
     let id: UUID
     let accessoryID: UUID
@@ -49,6 +62,8 @@ struct ServiceModel: Identifiable, Equatable {
     var name: String
     var accessoryName: String
     var kind: ServiceKind // this will likely never change...? still making var just to future proof
+    /// Usually accessory-level state; external callers will copy state here for UI to read
+    /// (i.e. "isReachable: accessory.isReachable")
     var isReachable: Bool
     var capabilities: ServiceCapabilities // this could change w/ device updates/etc
     var values: ServiceValues // this will change frequently
