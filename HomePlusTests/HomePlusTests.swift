@@ -16,7 +16,7 @@ struct HomePlusTests {
     // MARK: ServiceCapabilities
     
     /// Passes if ServiceCapabilities automatically uses/applies its default values
-    @Test func serviceCapabilitiesUseDefaultValues() throws {
+    @Test func serviceCapabilitiesUseDefaults() throws {
         let capabilities = ServiceCapabilities(supportsPower: true)
         
         #expect(capabilities.supportsPower)
@@ -51,7 +51,7 @@ struct HomePlusTests {
     // MARK: ServiceKind
     
     /// Validates that HomeKitMapper.serviceKind() returns expected results
-    @Test func serviceKindMapsProperly() {
+    @Test func serviceKindPasses() {
         let unsupportedType: String = "dog"
         
         let mapResult1: ServiceKind = HomeKitMapper.serviceKind(for: HomeKitTypes.Service.lightbulb)
@@ -68,7 +68,7 @@ struct HomePlusTests {
     // MARK: CharacteristicValue
     
     /// Validates that CharacteristicValue Double parsing returns expected results
-    @Test func characteristicValueDoubleParserReturnsExpectedResults() {
+    @Test func characteristicValueDoubleParserPasses() {
         let parseResult1: Double? = CharacteristicValue.double(12)
         let parseResult2: Double? = CharacteristicValue.double(true)
         let parseResult3: Double? = CharacteristicValue.double("bad")
@@ -79,7 +79,7 @@ struct HomePlusTests {
     }
     
     /// Validates that CharacteristicValue Int parsing returns expected results
-    @Test func characteristicValueIntParserReturnsExpectedResults() {
+    @Test func characteristicValueIntParserPasses() {
         let parseResult1: Int? = CharacteristicValue.int(12.8)
         let parseResult2: Int? = CharacteristicValue.int(false)
         let parseResult3: Int? = CharacteristicValue.int(nil)
@@ -89,9 +89,8 @@ struct HomePlusTests {
         #expect(parseResult3 == nil)
     }
     
-
     /// Validates that CharacteristicValue Bool parsing returns expected results
-    @Test func characteristicValueBoolParserReturnsExpectedResults() {
+    @Test func characteristicValueBoolParserPasses() {
         let parseResult1: Bool? = CharacteristicValue.bool(true)
         let parseResult2: Bool? = CharacteristicValue.bool(0)
         let parseResult3: Bool? = CharacteristicValue.bool(2)
@@ -101,5 +100,51 @@ struct HomePlusTests {
         #expect(parseResult2 == false)
         #expect(parseResult3 == true)
         #expect(parseResult4 == nil)
+    }
+    
+    // MARK: HomeStore
+    
+    /// Ensure HomeStore's services() filters by room properly
+    @Test func servicesReturnsExpectedResults() {
+        let store: HomeStore = .init()
+        
+        let room: RoomModel = .init(id: UUID(), name: "Living Room")
+        
+        let matchingService: ServiceModel = .init(id: UUID(),
+                                                  accessoryID: UUID(),
+                                                  roomID: room.id,
+                                                  name: "Power",
+                                                  accessoryName: "Fan",
+                                                  kind: ServiceKind.fan,
+                                                  isReachable: true,
+                                                  capabilities: .init(supportsPower: true),
+                                                  values: .init())
+        let otherRoomService: ServiceModel = .init(id: UUID(),
+                                                   accessoryID: UUID(),
+                                                   roomID: UUID(),
+                                                   name: "Power",
+                                                   accessoryName: "Fan",
+                                                   kind: ServiceKind.fan,
+                                                   isReachable: true,
+                                                   capabilities: .init(supportsPower: true),
+                                                   values: .init())
+        
+        store.services.append(matchingService)
+        store.services.append(otherRoomService)
+        
+        let results = store.services(in: room)
+        
+        #expect(results.count == 1)
+        #expect(results.first?.id == matchingService.id)
+    }
+    
+    /// Ensure HomeStore's selectHome() functions as expected
+    @Test func selectHomeUpdatesSelectedHome() {
+        let store: HomeStore = .init()
+        let home: HomeModel = .init(id: UUID(), name: "Test Home", isPrimary: true)
+        
+        store.selectHome(home)
+        
+        #expect(store.selectedHome == home)
     }
 }
