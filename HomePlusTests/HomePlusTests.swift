@@ -141,7 +141,7 @@ struct HomePlusTests {
     /// Ensure HomeStore's selectHome() functions as expected
     @Test func selectHomeUpdatesSelectedHome() {
         let store: HomeStore = .init()
-        let home: HomeModel = .init(id: UUID(), name: "Test Home"/*, isPrimary: true*/) // primaryHome deprecated in iOS 16.1
+        let home: HomeModel = .init(id: UUID(), name: "Test Home")
         
         store.selectHome(home)
         

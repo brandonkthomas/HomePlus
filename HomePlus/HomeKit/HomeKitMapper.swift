@@ -67,6 +67,5 @@ enum HomeKitMapper { // pseudo-namespace since we do not need instances here
     static func homeModel(from home: HMHome) -> HomeModel {
         return .init(id: home.uniqueIdentifier,
                      name: home.name)
-                     //isPrimary: isPrimary) // primaryHome deprecated in iOS 16.1
     }
 }
