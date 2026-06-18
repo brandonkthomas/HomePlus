@@ -5,9 +5,11 @@
 //  Created by Brandon Thomas on 6/13/26.
 //
 
+import HomeKit
+
 enum HomeKitMapper { // pseudo-namespace since we do not need instances here
     
-    /// Maps a string to ServiceKind enum
+    /// Maps a string => HomePlus.ServiceKind enum
     // "for" is the external caller's name; serviceType is the function's internal referenced
     //   parameter name; "_" disregards external labels
     static func serviceKind(for serviceType: String) -> ServiceKind {
@@ -59,5 +61,12 @@ enum HomeKitMapper { // pseudo-namespace since we do not need instances here
         default:
             return .unsupported(serviceType)
         }
+    }
+    
+    /// Maps HomeKit.HMHome => HomePlus.HomeModel
+    static func homeModel(from home: HMHome) -> HomeModel {
+        return .init(id: home.uniqueIdentifier,
+                     name: home.name)
+                     //isPrimary: isPrimary) // primaryHome deprecated in iOS 16.1
     }
 }

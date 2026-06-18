@@ -26,6 +26,9 @@ final class HomeStore {
     
     // MARK: Properties
     
+    /// Collection of all Homes available to us
+    var homes: [HomeModel] = []
+    
     // Optional in case HomeKit has not loaded homes yet; user denied permissions;
     //  user has no homes; multiple homes exist + no default selected yet; etc
     var selectedHome: HomeModel?

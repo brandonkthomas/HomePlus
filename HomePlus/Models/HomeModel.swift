@@ -16,5 +16,5 @@ import Foundation
 struct HomeModel: Identifiable, Equatable {
     let id: UUID
     var name: String
-    var isPrimary: Bool
+//    var isPrimary: Bool // primaryHome deprecated in iOS 16.1
 }
