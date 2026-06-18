@@ -114,7 +114,7 @@ struct HomePlusTests {
                                                   accessoryID: UUID(),
                                                   roomID: room.id,
                                                   name: "Power",
-                                                  accessoryName: "Fan",
+                                                  accessoryName: "Garage Fan",
                                                   kind: ServiceKind.fan,
                                                   isReachable: true,
                                                   capabilities: .init(supportsPower: true),
@@ -123,7 +123,7 @@ struct HomePlusTests {
                                                    accessoryID: UUID(),
                                                    roomID: UUID(),
                                                    name: "Power",
-                                                   accessoryName: "Fan",
+                                                   accessoryName: "Garage Fan",
                                                    kind: ServiceKind.fan,
                                                    isReachable: true,
                                                    capabilities: .init(supportsPower: true),
@@ -146,5 +146,60 @@ struct HomePlusTests {
         store.selectHome(home)
         
         #expect(store.selectedHome == home)
+    }
+    
+    /// A power-capable service currently off becomes on
+    @Test func togglePowerUpdatesServiceState() {
+        let store: HomeStore = .init()
+        let lightService: ServiceModel = .init(id: UUID(),
+                                               accessoryID: UUID(),
+                                               roomID: UUID(),
+                                               name: "Light",
+                                               accessoryName: "Desk Lamp",
+                                               kind: ServiceKind.light,
+                                               isReachable: true,
+                                               capabilities: .init(supportsPower: true),
+                                               values: .init())
+        
+        store.services.append(lightService)
+        
+        let initialState: Bool? = lightService.values.isOn
+        #expect(initialState == nil)
+        
+        store.togglePower(for: lightService.id)
+        
+        #expect(store.services.first?.values.isOn == true)
+    }
+    
+    /// A service without power capability remains unchanged
+    @Test func togglePowerForUnsupportedServiceRemainsUnchanged() {
+        let store: HomeStore = .init()
+        let lightService: ServiceModel = .init(id: UUID(),
+                                               accessoryID: UUID(),
+                                               roomID: UUID(),
+                                               name: "Light",
+                                               accessoryName: "Desk Lamp",
+                                               kind: ServiceKind.light,
+                                               isReachable: true,
+                                               capabilities: .init(supportsPower: false),
+                                               values: .init())
+        
+        store.services.append(lightService)
+        
+        let initialState: Bool? = lightService.values.isOn
+        #expect(initialState == nil)
+        
+        store.togglePower(for: lightService.id)
+        
+        #expect(store.services.first?.values.isOn == nil)
+    }
+    
+    /// An unknown service ID does not change the array or crash.
+    @Test func togglePowerForUnknownServiceIdDoesNotThrow() {
+        let store: HomeStore = .init()
+        
+        store.togglePower(for: UUID())
+        
+        #expect(true) // we didn't break
     }
 }

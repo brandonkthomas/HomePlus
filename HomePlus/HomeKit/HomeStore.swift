@@ -13,7 +13,14 @@ import Observation
 // - @Observable (modern) is a macro... compiler generates SwiftUI prop tracking automatically;
 //   "... class ClassName: ObservableObject" is prev approach + requires "@Published" props
 //
-/// Observable instance holding current app state
+/// Observable instance holding current app state.
+///
+/// Intended app flow:
+/// HMAccessory / HMService / HMCharacteristic =>
+/// HomeKitRepository =>
+/// Model =>
+/// HomeStore =>
+/// SwiftUI views
 @Observable
 final class HomeStore {
     
@@ -45,5 +52,24 @@ final class HomeStore {
     /// Selects the active home for the current app state
     func selectHome(_ home: HomeModel) {
         selectedHome = home
+    }
+    
+    /// Toggles power for a given Service
+    func togglePower(for serviceID: ServiceModel.ID) {
+        guard let index = services.firstIndex(where: { service in
+            service.id == serviceID
+        }) else {
+            return // service not found; nothing to do
+        }
+        
+        let supportsPower: Bool = services[index].capabilities.supportsPower
+        
+        guard supportsPower else { // service doesn't support power toggle; nothing to do
+            return
+        }
+        
+        let currentState = services[index].values.isOn ?? false // treat nil == false
+        
+        services[index].values.isOn = !currentState // flip current state
     }
 }
