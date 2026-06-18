@@ -43,11 +43,21 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate {
     ///
     /// Required by HMHomeManagerDelegate
     func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
-        // Publish updated homes to our HomeStore instance
+        // Publish updated Homes to our HomeStore instance
         let mappedHomes: [HomeModel] = manager.homes.map { home in
             HomeKitMapper.homeModel(from: home)
         }
         
         store.homes = mappedHomes
+        
+        if let selectedHome = store.selectedHome {
+            // Handle case where cached Home selection has been removed
+            if !mappedHomes.contains(where: { $0.id == selectedHome.id }) {
+                store.selectedHome = mappedHomes.first
+            }
+        } else {
+            // Try to set a default if no Home selection exists
+            store.selectedHome = mappedHomes.first
+        }
     }
 }
