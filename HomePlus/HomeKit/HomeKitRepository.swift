@@ -48,16 +48,6 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate {
             HomeKitMapper.homeModel(from: home)
         }
         
-        store.homes = mappedHomes
-        
-        if let selectedHome = store.selectedHome {
-            // Handle case where cached Home selection has been removed
-            if !mappedHomes.contains(where: { $0.id == selectedHome.id }) {
-                store.selectedHome = mappedHomes.first
-            }
-        } else {
-            // Try to set a default if no Home selection exists
-            store.selectedHome = mappedHomes.first
-        }
+        store.replaceHomes(with: mappedHomes)
     }
 }

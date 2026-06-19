@@ -41,25 +41,47 @@ final class HomeStore {
     var cameras: [CameraModel] = []
     var automations: [AutomationModel] = []
         
-    // MARK: Methods
+    // MARK: Methods (Collections)
     
     /// Returns all available Services for a specific Room
     func services(in room: RoomModel) -> [ServiceModel] {
         // Swift allows implicit return for single-expression functions
         //  (i.e. C# "Func() => val;")
-        services.filter { service in
+        self.services.filter { service in
             service.roomID == room.id
         }
     }
     
-    /// Selects the active home for the current app state
+    // MARK: Methods (Management)
+    
+    /// Selects the active home for the current app state (if it exists in the HomeStore)
     func selectHome(_ home: HomeModel) {
-        selectedHome = home
+        let requestedHome = findHome(by: home.id)
+        
+        if requestedHome != nil {
+            self.selectedHome = requestedHome
+        }
+    }
+    
+    /// Replaces Homes array w/ new copy.
+    /// Retains currently selected Home if it exists; otherwise selects first in array.
+    func replaceHomes(with newHomes: [HomeModel]) {
+        let selectedId = self.selectedHome?.id
+        
+        self.homes = newHomes
+        
+        let newSelectedHome: HomeModel? = findHome(by: selectedId)
+        
+        if newSelectedHome != nil {
+            self.selectedHome = newSelectedHome
+        } else {
+            self.selectedHome = self.homes.first
+        }
     }
     
     /// Toggles power for a given Service
     func togglePower(for serviceID: ServiceModel.ID) {
-        guard let index = services.firstIndex(where: { service in
+        guard let index = self.services.firstIndex(where: { service in
             service.id == serviceID
         }) else {
             return // service not found; nothing to do
@@ -74,5 +96,15 @@ final class HomeStore {
         let currentState = services[index].values.isOn ?? false // treat nil == false
         
         services[index].values.isOn = !currentState // flip current state
+    }
+    
+    // MARK: Private Helpers
+    
+    private func findHome(by ID: HomeModel.ID?) -> HomeModel? {
+        guard let id = ID else {
+            return nil
+        }
+        
+        return self.homes.first(where: { $0.id == id })
     }
 }

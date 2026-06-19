@@ -143,9 +143,48 @@ struct HomePlusTests {
         let store: HomeStore = .init()
         let home: HomeModel = .init(id: UUID(), name: "Test Home")
         
+        store.homes.append(home)
         store.selectHome(home)
         
         #expect(store.selectedHome == home)
+    }
+    
+    /// Ensure a selected home retains its updated metadata when replaceHomes() is
+    /// called w/ differing values (other than ID)
+    @Test func selectedHomeRetainsMetadataChanges() {
+        let store: HomeStore = .init()
+        var home: HomeModel = .init(id: UUID(), name: "Alpha")
+        
+        store.homes.append(home)
+        store.selectHome(home)
+        
+        #expect(store.selectedHome == home)
+        #expect(store.selectedHome?.name == "Alpha")
+        
+        home.name = "Beta"
+        store.replaceHomes(with: [home])
+        
+        #expect(store.selectedHome == home)
+        #expect(store.selectedHome?.name == "Beta")
+    }
+    
+    /// Ensure stale caller objects' metadata does not bleed through the selectHome() func;
+    /// only ID should be checked and other existing metadata should not be overridden
+    @Test func selectHomeStaleCallerCannotOverrideStore() {
+        let store: HomeStore = .init()
+        let id: UUID = UUID()
+        let currentHome: HomeModel = .init(id: id, name: "Current")
+        
+        store.homes.append(currentHome)
+        store.selectHome(currentHome)
+        
+        #expect(store.selectedHome == currentHome)
+        #expect(store.selectedHome?.name == "Current")
+        
+        let staleHome: HomeModel = .init(id: id, name: "Stale")
+        store.selectHome(staleHome)
+        
+        #expect(store.selectedHome?.name == "Current")
     }
     
     /// A power-capable service currently off becomes on
