@@ -10,8 +10,29 @@ import HomeKit
 
 /// Repository for live HK objects (isolates from app-facing models).
 ///
-/// DI w/ HomeStore: create HomeStore => give to HomeKitRepository => HomeKitRepository updates
-///  & SwiftUI observes that HomeStore.
+/// Commands/infrastructure: HomeKitRepository;
+/// queries/state: HomeStore.
+///
+/// DI w/ HomeStore:
+///  create HomeStore =>
+///  give to HomeKitRepository =>
+///  HomeKitRepository updates & SwiftUI observes that HomeStore.
+///
+/// For user actions:
+///   - SwiftUI user action
+///   - HomeKitRepository command
+///   - HMHome / HMCharacteristic operation
+///   - HomeKit callback or write completion
+///   - HomeStore update
+///   - SwiftUI redraw
+///
+/// For home selection:
+///   - View reads store.homes
+///   - View calls repository.selectHome(home)
+///   - Repository calls store.selectHome(home)
+///   - Repository refreshes selected HMHome data
+///   - Store changes
+///   - View redraws
 ///
 /// NSObject is inherited to provide Objective-C interop for HK delegates (HMHomeManagerDelegate).
 final class HomeKitRepository: NSObject, HMHomeManagerDelegate {
@@ -22,6 +43,17 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate {
     // public functions.
     private let homeManager: HMHomeManager
     private let store: HomeStore
+    
+    // MARK: Properties (Calculated)
+
+    /// Retrieve HomeStore's selected Home mapped to HomeKit.HMHome (calculated)
+    private var selectedHMHome: HMHome? {
+        if let id = store.selectedHome?.id,
+           let home = homeManager.homes.first(where: { $0.uniqueIdentifier == id }) {
+            return home
+        }
+        return nil
+    }
     
     // MARK: Init
     
@@ -34,6 +66,16 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate {
         super.init() // initialize NSObject; now we can use "self"
         
         homeManager.delegate = self // assign this repo as manager's delegate
+    }
+    
+    // MARK: Functions
+    
+    /// Selects a new Home & re-retrieves available Rooms.
+    ///
+    /// HomeStore (internal mapping class) is the underlying updated class here.
+    func selectHome(_ home: HomeModel) {
+        store.selectHome(home)
+        refreshHomeChildren()
     }
     
     // MARK: Delegate Callbacks
@@ -49,5 +91,32 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate {
         }
         
         store.replaceHomes(with: mappedHomes)
+        
+        // Apply selected Home's Rooms, Accessories to local HomeStore
+        refreshHomeChildren()
+    }
+    
+    // MARK: Private Helpers
+    
+    /// Retrieve a HomeKit.HMHome's child HMRooms,
+    /// map them to HomePlus.RoomModel,
+    /// & apply to HomeKitRepository's local HomeStore.rooms
+    private func refreshHomeChildren() {
+        if let home = self.selectedHMHome {
+            // Rooms
+            let mappedRooms: [RoomModel] = home.rooms.map { room in
+                HomeKitMapper.roomModel(from: room)
+            }
+            store.rooms = mappedRooms
+            
+            // Accessories
+            let mappedAccessories: [AccessoryModel] = home.accessories.map { accessory in
+                HomeKitMapper.accessoryModel(from: accessory)
+            }
+            store.accessories = mappedAccessories
+        } else {
+            store.rooms = []
+            store.accessories = []
+        }
     }
 }

@@ -14,6 +14,7 @@ import Observation
 //   "... class ClassName: ObservableObject" is prev approach + requires "@Published" props
 //
 /// Observable instance holding current app state.
+/// See HomeKitRepository for more documentation.
 ///
 /// Intended app flow:
 /// HMAccessory / HMService / HMCharacteristic =>
@@ -56,9 +57,7 @@ final class HomeStore {
     
     /// Selects the active home for the current app state (if it exists in the HomeStore)
     func selectHome(_ home: HomeModel) {
-        let requestedHome = findHome(by: home.id)
-        
-        if requestedHome != nil {
+        if let requestedHome = findHome(by: home.id) {
             self.selectedHome = requestedHome
         }
     }
@@ -70,9 +69,7 @@ final class HomeStore {
         
         self.homes = newHomes
         
-        let newSelectedHome: HomeModel? = findHome(by: selectedId)
-        
-        if newSelectedHome != nil {
+        if let newSelectedHome = findHome(by: selectedId) {
             self.selectedHome = newSelectedHome
         } else {
             self.selectedHome = self.homes.first
@@ -86,11 +83,9 @@ final class HomeStore {
         }) else {
             return // service not found; nothing to do
         }
-        
-        let supportsPower: Bool = services[index].capabilities.supportsPower
-        
-        guard supportsPower else { // service doesn't support power toggle; nothing to do
-            return
+                
+        guard services[index].capabilities.supportsPower else {
+            return // service doesn't support power toggle; nothing to do
         }
         
         let currentState = services[index].values.isOn ?? false // treat nil == false
@@ -100,8 +95,8 @@ final class HomeStore {
     
     // MARK: Private Helpers
     
-    private func findHome(by ID: HomeModel.ID?) -> HomeModel? {
-        guard let id = ID else {
+    private func findHome(by id: HomeModel.ID?) -> HomeModel? {
+        guard let id = id else {
             return nil
         }
         

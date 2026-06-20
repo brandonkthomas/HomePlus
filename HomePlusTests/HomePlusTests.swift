@@ -151,7 +151,7 @@ struct HomePlusTests {
     
     /// Ensure a selected home retains its updated metadata when replaceHomes() is
     /// called w/ differing values (other than ID)
-    @Test func selectedHomeRetainsMetadataChanges() {
+    @Test func replaceHomesRefreshesSelectedHomeMetadata() {
         let store: HomeStore = .init()
         var home: HomeModel = .init(id: UUID(), name: "Alpha")
         
@@ -166,6 +166,51 @@ struct HomePlusTests {
         
         #expect(store.selectedHome == home)
         #expect(store.selectedHome?.name == "Beta")
+    }
+    
+    /// Ensure HomeStore selects first-provided Home by default
+    @Test func initialHomesSelectFirst() {
+        let store: HomeStore = .init()
+        let homeA: HomeModel = .init(id: UUID(), name: "Alpha")
+        let homeB: HomeModel = .init(id: UUID(), name: "Beta")
+
+        store.replaceHomes(with: [homeA, homeB])
+        
+        #expect(store.homes == [homeA, homeB])
+        #expect(store.selectedHome == homeA)
+    }
+    
+    /// Ensure HomeStore falls back to another Home when current selection is removed
+    @Test func removedSelectionFallsBack() {
+        let store: HomeStore = .init()
+        let homeA: HomeModel = .init(id: UUID(), name: "Alpha")
+        let homeB: HomeModel = .init(id: UUID(), name: "Beta")
+
+        store.replaceHomes(with: [homeA, homeB])
+        store.selectHome(homeB)
+        
+        #expect(store.selectedHome == homeB)
+
+        store.replaceHomes(with: [homeA])
+        
+        #expect(store.selectedHome == homeA)
+    }
+    
+    /// Ensure HomeStore has no selectedHome when replaceHomes is called with []
+    @Test func emptyReplacementClearsSelection() {
+        let store: HomeStore = .init()
+        let homeA: HomeModel = .init(id: UUID(), name: "Alpha")
+        let homeB: HomeModel = .init(id: UUID(), name: "Beta")
+
+        store.replaceHomes(with: [homeA, homeB])
+        store.selectHome(homeB)
+        
+        #expect(store.selectedHome == homeB)
+
+        store.replaceHomes(with: [])
+        
+        #expect(store.homes.isEmpty)
+        #expect(store.selectedHome == nil)
     }
     
     /// Ensure stale caller objects' metadata does not bleed through the selectHome() func;

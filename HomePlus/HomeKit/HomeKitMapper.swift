@@ -68,4 +68,18 @@ enum HomeKitMapper { // pseudo-namespace since we do not need instances here
         return .init(id: home.uniqueIdentifier,
                      name: home.name)
     }
+    
+    /// Maps HomeKit.HMRoom => HomePlus.RoomModel
+    static func roomModel(from room: HMRoom) -> RoomModel {
+        return .init(id: room.uniqueIdentifier,
+                     name: room.name)
+    }
+    
+    /// Maps HomeKit.HMAccessory => HomePlus.AccessoryModel
+    static func accessoryModel(from accessory: HMAccessory) -> AccessoryModel {
+        return .init(id: accessory.uniqueIdentifier,
+                     name: accessory.name,
+                     roomID: accessory.room?.uniqueIdentifier,
+                     isReachable: accessory.isReachable)
+    }
 }
