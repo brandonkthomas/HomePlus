@@ -75,7 +75,7 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate {
     /// HomeStore (internal mapping class) is the underlying updated class here.
     func selectHome(_ home: HomeModel) {
         store.selectHome(home)
-        refreshHomeChildren()
+        refreshSelectedHomeData()
     }
     
     // MARK: Delegate Callbacks
@@ -92,16 +92,16 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate {
         
         store.replaceHomes(with: mappedHomes)
         
-        // Apply selected Home's Rooms, Accessories to local HomeStore
-        refreshHomeChildren()
+        // Apply selected Home's Rooms/Accessories to local HomeStore
+        refreshSelectedHomeData()
     }
     
     // MARK: Private Helpers
     
-    /// Retrieve a HomeKit.HMHome's child HMRooms,
-    /// map them to HomePlus.RoomModel,
+    /// Retrieve a HomeKit.HMHome's child .rooms/.accessories,
+    /// map them to HomePlus \*Models,
     /// & apply to HomeKitRepository's local HomeStore.rooms
-    private func refreshHomeChildren() {
+    private func refreshSelectedHomeData() {
         if let home = self.selectedHMHome {
             // Rooms
             let mappedRooms: [RoomModel] = home.rooms.map { room in

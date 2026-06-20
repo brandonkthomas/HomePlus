@@ -7,7 +7,7 @@
 
 import HomeKit
 
-enum HomeKitMapper { // pseudo-namespace since we do not need instances here
+enum HomeKitMapper { // enum: pseudo-namespace since we do not need instances here (fully static)
     
     /// Maps a string => HomePlus.ServiceKind enum
     // "for" is the external caller's name; serviceType is the function's internal referenced
@@ -81,5 +81,46 @@ enum HomeKitMapper { // pseudo-namespace since we do not need instances here
                      name: accessory.name,
                      roomID: accessory.room?.uniqueIdentifier,
                      isReachable: accessory.isReachable)
+    }
+    
+    /// Maps HomeKit.HMService + its parent HMAccessory => HomePlus.ServiceModel
+    static func serviceModel(from service: HMService,
+                             accessory: HMAccessory) -> ServiceModel {
+        return .init(id: service.uniqueIdentifier,
+                     accessoryID: accessory.uniqueIdentifier,
+                     roomID: accessory.room?.uniqueIdentifier,
+                     name: service.name,
+                     accessoryName: accessory.name,
+                     kind: serviceKind(for: service.serviceType),
+                     isReachable: accessory.isReachable,
+                     capabilities: ServiceCapabilities(),
+                     values: ServiceValues())
+    }
+    
+    /// Derives app-facing service capabilities from HomeKit characteristic type identifiers
+    static func serviceCapabilities(from types: Set<String>) -> ServiceCapabilities {
+
+        let supportsPower: Bool = types.contains(HomeKitTypes.Characteristic.powerState)
+            || types.contains(HomeKitTypes.Characteristic.active)
+
+        let supportsBrightness: Bool = types.contains(HomeKitTypes.Characteristic.brightness)
+
+        let supportsColor: Bool = types.contains(HomeKitTypes.Characteristic.hue)
+            && types.contains(HomeKitTypes.Characteristic.saturation)
+
+        let supportsColorTemperature: Bool = types.contains(HomeKitTypes.Characteristic.colorTemperature)
+
+        let supportsPosition: Bool = types.contains(HomeKitTypes.Characteristic.targetPosition)
+
+        let supportsTilt: Bool = types.contains(HomeKitTypes.Characteristic.targetHorizontalTiltAngle)
+            || types.contains(HomeKitTypes.Characteristic.targetVerticalTiltAngle)
+            || types.contains(HomeKitTypes.Characteristic.targetTiltAngle)
+
+        return .init(supportsPower: supportsPower,
+                     supportsBrightness: supportsBrightness,
+                     supportsColor: supportsColor,
+                     supportsColorTemperature: supportsColorTemperature,
+                     supportsPosition: supportsPosition,
+                     supportsTilt: supportsTilt)
     }
 }

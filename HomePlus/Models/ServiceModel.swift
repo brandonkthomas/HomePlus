@@ -7,6 +7,23 @@
 
 import Foundation
 
+/// Mapping for HMService (a capability exposed by an HMAccessory)
+/// Most user-facing interactable UI elements will be services; therefore this is mostly
+///  used for direct UI interactions
+struct ServiceModel: Identifiable, Equatable {
+    let id: UUID
+    let accessoryID: UUID
+    var roomID: UUID?
+    var name: String
+    var accessoryName: String
+    var kind: ServiceKind // this will likely never change...? still making var just to future proof
+    /// Usually accessory-level state; external callers will copy state here for UI to read
+    /// (i.e. "isReachable: accessory.isReachable")
+    var isReachable: Bool
+    var capabilities: ServiceCapabilities // this could change w/ device updates/etc
+    var values: ServiceValues // this will change frequently
+}
+
 /// What type of HMService is this?
 enum ServiceKind: Equatable {
     case light
@@ -50,21 +67,4 @@ struct ServiceValues: Equatable {
     var position: Double? = nil
     var temperature: Double? = nil
     var statusText: String? = nil
-}
-
-/// Mapping for HMService (a capability exposed by an HMAccessory)
-/// Most user-facing interactable UI elements will be services; therefore this is mostly
-///  used for direct UI interactions
-struct ServiceModel: Identifiable, Equatable {
-    let id: UUID
-    let accessoryID: UUID
-    var roomID: UUID?
-    var name: String
-    var accessoryName: String
-    var kind: ServiceKind // this will likely never change...? still making var just to future proof
-    /// Usually accessory-level state; external callers will copy state here for UI to read
-    /// (i.e. "isReachable: accessory.isReachable")
-    var isReachable: Bool
-    var capabilities: ServiceCapabilities // this could change w/ device updates/etc
-    var values: ServiceValues // this will change frequently
 }
