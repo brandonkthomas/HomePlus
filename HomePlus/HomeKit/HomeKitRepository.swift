@@ -76,7 +76,7 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate {
     func selectHome(_ home: HomeModel) {
         store.selectHome(home)
 
-        // Apply selected Home's Rooms/Accessories/Services/Scenes to local HomeStore
+        // Apply selected Home's children to local HomeStore
         refreshSelectedHomeData()
     }
     
@@ -94,16 +94,16 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate {
         
         store.replaceHomes(with: mappedHomes)
         
-        // Apply selected Home's Rooms/Accessories/Services/Scenes to local HomeStore
+        // Apply selected Home's children to local HomeStore
         refreshSelectedHomeData()
     }
     
     // MARK: Private Helpers
     
-    /// Retrieve a HomeKit.HMHome's child .rooms/.accessories/.services/.scenes,
+    /// Retrieve a HomeKit.HMHome's child .rooms/.accessories/.services/.scenes/.cameras,
     /// map them to HomePlus \*Models,
     /// & apply to HomeKitRepository's local HomeStore properties
-    /// (rooms, accessories, services, scenes)
+    /// (rooms, accessories, services, scenes, cameras)
     private func refreshSelectedHomeData() {
         if let home = self.selectedHMHome {
             // Rooms
@@ -150,11 +150,23 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate {
 
             store.scenes = mappedScenes
 
+            // Cameras
+            var cameras: [CameraModel] = []
+
+            for accessory in home.accessories {
+                for cameraProfile in accessory.cameraProfiles ?? [] {
+                    cameras.append(HomeKitMapper.cameraModel(from: cameraProfile, accessory: accessory))
+                }
+            }
+
+            store.cameras = cameras
+
         } else {
             store.rooms = []
             store.accessories = []
             store.services = []
             store.scenes = []
+            store.cameras = []
         }
     }
 }

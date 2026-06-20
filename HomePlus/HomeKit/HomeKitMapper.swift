@@ -93,9 +93,8 @@ enum HomeKitMapper { // enum: pseudo-namespace since we do not need instances he
     /// Maps HomeKit.HMCameraProfile => HomePlus.CameraModel plus parent Accessory
     static func cameraModel(from cameraProfile: HMCameraProfile,
                             accessory: HMAccessory) -> CameraModel {
-        let hasMotionSensor: Bool = accessory.services.contains {
+        let hasMotionSensor: Bool = cameraProfile.services.contains {
             $0.serviceType == HomeKitTypes.Service.motionSensor
-//            && $0.uniqueIdentifier == cameraProfile.services.any?.uniqueIdentifier
         }
 
         return .init(id: cameraProfile.uniqueIdentifier,
