@@ -82,10 +82,53 @@ enum HomeKitMapper { // enum: pseudo-namespace since we do not need instances he
                      roomID: accessory.room?.uniqueIdentifier,
                      isReachable: accessory.isReachable)
     }
-    
+
+    /// Maps HomeKit.HMActionSet => HomePlus.SceneModel
+    static func sceneModel(from actionSet: HMActionSet) -> SceneModel {
+        return .init(id: actionSet.uniqueIdentifier,
+                     name: actionSet.name,
+                     isActive: false)
+    }
+
+    /// Maps HomeKit.HMCameraProfile => HomePlus.CameraModel plus parent Accessory
+    static func cameraModel(from cameraProfile: HMCameraProfile,
+                            accessory: HMAccessory) -> CameraModel {
+        let hasMotionSensor: Bool = accessory.services.contains {
+            $0.serviceType == HomeKitTypes.Service.motionSensor
+//            && $0.uniqueIdentifier == cameraProfile.services.any?.uniqueIdentifier
+        }
+
+        return .init(id: cameraProfile.uniqueIdentifier,
+                     name: accessory.name,
+                     accessoryID: accessory.uniqueIdentifier,
+                     roomID: accessory.room?.uniqueIdentifier,
+                     hasMotionSensor: hasMotionSensor)
+    }
+
     /// Maps HomeKit.HMService + its parent HMAccessory => HomePlus.ServiceModel
     static func serviceModel(from service: HMService,
                              accessory: HMAccessory) -> ServiceModel {
+        let characteristicTypes: Set<String> = Set(service.characteristics.map { characteristic in
+            characteristic.characteristicType
+        })
+
+        let valuesByType = service.characteristics.reduce(into: [String: Any]()) {
+            dictionary, characteristic in // assign aliases
+
+            if let value = characteristic.value { // unwrap + skip if nil
+                dictionary[characteristic.characteristicType] = value // add/replace
+            }
+        }
+
+        // can also use:
+        //var valuesByType: [String: Any] = [:]
+        //
+        //for characteristic in service.characteristics {
+        //    if let value = characteristic.value {
+        //        valuesByType[characteristic.characteristicType] = value
+        //    }
+        //}
+
         return .init(id: service.uniqueIdentifier,
                      accessoryID: accessory.uniqueIdentifier,
                      roomID: accessory.room?.uniqueIdentifier,
@@ -93,8 +136,8 @@ enum HomeKitMapper { // enum: pseudo-namespace since we do not need instances he
                      accessoryName: accessory.name,
                      kind: serviceKind(for: service.serviceType),
                      isReachable: accessory.isReachable,
-                     capabilities: ServiceCapabilities(),
-                     values: ServiceValues())
+                     capabilities: serviceCapabilities(from: characteristicTypes),
+                     values: serviceValues(from: valuesByType))
     }
     
     /// Derives app-facing service capabilities from HomeKit characteristic type identifiers
@@ -122,5 +165,34 @@ enum HomeKitMapper { // enum: pseudo-namespace since we do not need instances he
                      supportsColorTemperature: supportsColorTemperature,
                      supportsPosition: supportsPosition,
                      supportsTilt: supportsTilt)
+    }
+
+    /// Derives app-facing service capability values from HomeKit characteristic type identifiers
+    static func serviceValues(from valuesByType: [String: Any]) -> ServiceValues {
+
+        let powerState: Bool? = CharacteristicValue.bool(
+            valuesByType[HomeKitTypes.Characteristic.powerState]
+        )
+
+        let active: Bool? = CharacteristicValue.bool(
+            valuesByType[HomeKitTypes.Characteristic.active]
+        )
+
+        let brightness: Double? = CharacteristicValue.double(
+            valuesByType[HomeKitTypes.Characteristic.brightness]
+        )
+
+        let currentPosition: Double? = CharacteristicValue.double(
+            valuesByType[HomeKitTypes.Characteristic.currentPosition]
+        )
+
+        let currentTemperature: Double? = CharacteristicValue.double(
+            valuesByType[HomeKitTypes.Characteristic.currentTemperature]
+        )
+
+        return .init(isOn: powerState ?? active,
+                     brightness: brightness,
+                     position: currentPosition,
+                     temperature: currentTemperature)
     }
 }

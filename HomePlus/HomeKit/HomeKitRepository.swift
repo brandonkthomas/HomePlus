@@ -75,6 +75,8 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate {
     /// HomeStore (internal mapping class) is the underlying updated class here.
     func selectHome(_ home: HomeModel) {
         store.selectHome(home)
+
+        // Apply selected Home's Rooms/Accessories/Services/Scenes to local HomeStore
         refreshSelectedHomeData()
     }
     
@@ -92,31 +94,67 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate {
         
         store.replaceHomes(with: mappedHomes)
         
-        // Apply selected Home's Rooms/Accessories to local HomeStore
+        // Apply selected Home's Rooms/Accessories/Services/Scenes to local HomeStore
         refreshSelectedHomeData()
     }
     
     // MARK: Private Helpers
     
-    /// Retrieve a HomeKit.HMHome's child .rooms/.accessories,
+    /// Retrieve a HomeKit.HMHome's child .rooms/.accessories/.services/.scenes,
     /// map them to HomePlus \*Models,
-    /// & apply to HomeKitRepository's local HomeStore.rooms
+    /// & apply to HomeKitRepository's local HomeStore properties
+    /// (rooms, accessories, services, scenes)
     private func refreshSelectedHomeData() {
         if let home = self.selectedHMHome {
             // Rooms
             let mappedRooms: [RoomModel] = home.rooms.map { room in
                 HomeKitMapper.roomModel(from: room)
             }
+
             store.rooms = mappedRooms
             
             // Accessories
             let mappedAccessories: [AccessoryModel] = home.accessories.map { accessory in
                 HomeKitMapper.accessoryModel(from: accessory)
             }
+
             store.accessories = mappedAccessories
+
+            // Services
+            var services: [ServiceModel] = []
+
+            for accessory in home.accessories {
+                for service in accessory.services {
+                    let mappedService: ServiceModel = HomeKitMapper.serviceModel(from: service,
+                                                                                 accessory: accessory)
+
+                    if case .unsupported = mappedService.kind { // if case in Swift is backwards :(
+                        continue
+                    }
+
+                    services.append(mappedService)
+                }
+            }
+
+            store.services = services
+
+            // Scenes
+            let filteredActionSets = home.actionSets.filter { actionSet in
+                actionSet.actionSetType != HMActionSetTypeTriggerOwned
+                    && !actionSet.actions.isEmpty
+            }
+
+            let mappedScenes: [SceneModel] = filteredActionSets.map { actionSet in
+                HomeKitMapper.sceneModel(from: actionSet)
+            }
+
+            store.scenes = mappedScenes
+
         } else {
             store.rooms = []
             store.accessories = []
+            store.services = []
+            store.scenes = []
         }
     }
 }
