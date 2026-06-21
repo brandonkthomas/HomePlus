@@ -34,9 +34,9 @@ import HomeKit
 ///   - Store changes
 ///   - View redraws
 ///
-/// NSObject is inherited to provide Objective-C interop for HK delegates (HMHomeManagerDelegate).
-final class HomeKitRepository: NSObject, HMHomeManagerDelegate {
-    
+/// NSObject is inherited to provide Objective-C interop for HK delegates (HMHomeManagerDelegate, HMHomeDelegate).
+final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate {
+
     // MARK: Properties
     
     // External callers can interact w/ homeManager + store *only indirectly* through repo's
@@ -93,11 +93,34 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate {
         }
         
         store.replaceHomes(with: mappedHomes)
-        
+
+        // Apply delegates to all Homes to keep all changes synced at all times
+        for home in manager.homes {
+            home.delegate = self
+        }
+
         // Apply selected Home's children to local HomeStore
         refreshSelectedHomeData()
+
+        // we're done loading; set state = ready if we're authorized
+        if manager.authorizationStatus.contains(.restricted) {
+            store.homeKitLoadState = .unauthorized
+        } else {
+            store.homeKitLoadState = .ready
+        }
     }
-    
+
+    /// Inherited from HMHomeManagerDelegate.homeManager(_:didUpdate:).
+    func homeManager(_ manager: HMHomeManager,
+                     didUpdate status: HMHomeManagerAuthorizationStatus) {
+        if status.contains(.restricted) {
+            store.homeKitLoadState = .unauthorized
+        }
+
+        // using "} else { ... = .loading" above may suppress already-ready stores
+        // if callbacks arrive out of order...
+    }
+
     // MARK: Private Helpers
     
     /// Retrieve a HomeKit.HMHome's child .rooms/.accessories/.services/.scenes/.cameras,

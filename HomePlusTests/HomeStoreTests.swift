@@ -12,41 +12,9 @@ import Testing
 @testable import HomePlus
 
 struct HomeStoreTests {
-    
-    /// Ensure HomeStore's services() filters by room properly
-    @Test func servicesReturnsExpectedResults() {
-        let store: HomeStore = .init()
-        
-        let room: RoomModel = .init(id: UUID(), name: "Living Room")
-        
-        let matchingService: ServiceModel = .init(id: UUID(),
-                                                  accessoryID: UUID(),
-                                                  roomID: room.id,
-                                                  name: "Power",
-                                                  accessoryName: "Garage Fan",
-                                                  kind: ServiceKind.fan,
-                                                  isReachable: true,
-                                                  capabilities: .init(supportsPower: true),
-                                                  values: .init())
-        let otherRoomService: ServiceModel = .init(id: UUID(),
-                                                   accessoryID: UUID(),
-                                                   roomID: UUID(),
-                                                   name: "Power",
-                                                   accessoryName: "Garage Fan",
-                                                   kind: ServiceKind.fan,
-                                                   isReachable: true,
-                                                   capabilities: .init(supportsPower: true),
-                                                   values: .init())
-        
-        store.services.append(matchingService)
-        store.services.append(otherRoomService)
-        
-        let results = store.services(in: room)
-        
-        #expect(results.count == 1)
-        #expect(results.first?.id == matchingService.id)
-    }
-    
+
+    // MARK: selectHome() / replaceHomes()
+
     /// Ensure HomeStore's selectHome() functions as expected
     @Test func selectHomeUpdatesSelectedHome() {
         let store: HomeStore = .init()
@@ -140,7 +108,43 @@ struct HomeStoreTests {
         
         #expect(store.selectedHome?.name == "Current")
     }
-    
+
+    // MARK: Services
+
+    /// Ensure HomeStore's services() filters by room properly
+    @Test func servicesReturnsExpectedResults() {
+        let store: HomeStore = .init()
+
+        let room: RoomModel = .init(id: UUID(), name: "Living Room")
+
+        let matchingService: ServiceModel = .init(id: UUID(),
+                                                  accessoryID: UUID(),
+                                                  roomID: room.id,
+                                                  name: "Power",
+                                                  accessoryName: "Garage Fan",
+                                                  kind: ServiceKind.fan,
+                                                  isReachable: true,
+                                                  capabilities: .init(supportsPower: true),
+                                                  values: .init())
+        let otherRoomService: ServiceModel = .init(id: UUID(),
+                                                   accessoryID: UUID(),
+                                                   roomID: UUID(),
+                                                   name: "Power",
+                                                   accessoryName: "Garage Fan",
+                                                   kind: ServiceKind.fan,
+                                                   isReachable: true,
+                                                   capabilities: .init(supportsPower: true),
+                                                   values: .init())
+
+        store.services.append(matchingService)
+        store.services.append(otherRoomService)
+
+        let results = store.services(in: room)
+
+        #expect(results.count == 1)
+        #expect(results.first?.id == matchingService.id)
+    }
+
     /// A power-capable service currently off becomes on
     @Test func togglePowerUpdatesServiceState() {
         let store: HomeStore = .init()
@@ -193,6 +197,14 @@ struct HomeStoreTests {
         
         store.togglePower(for: UUID())
         
-        #expect(true) // we didn't break
+        #expect(true) // we didn't die
+    }
+
+    // MARK: Load State
+
+    /// When creating HomeStore, homeKitLoadState should be .loading
+    @Test func initialStateIsLoading() {
+        let store: HomeStore = .init()
+        #expect(store.homeKitLoadState == .loading)
     }
 }

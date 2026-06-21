@@ -41,7 +41,10 @@ final class HomeStore {
     var scenes: [SceneModel] = []
     var cameras: [CameraModel] = []
     var automations: [AutomationModel] = []
-        
+
+    // what's our current state?
+    var homeKitLoadState: HomeKitLoadState = .loading
+
     // MARK: Methods (Collections)
     
     /// Returns all available Services for a specific Room
@@ -94,7 +97,8 @@ final class HomeStore {
     }
     
     // MARK: Private Helpers
-    
+
+    /// Check self.homes for a valid home matching the requested ID
     private func findHome(by id: HomeModel.ID?) -> HomeModel? {
         guard let id = id else {
             return nil
