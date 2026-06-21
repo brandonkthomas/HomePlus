@@ -77,22 +77,22 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate {
         store.selectHome(home)
 
         // Apply selected Home's children to local HomeStore
-        refreshSelectedHomeData()
+        if let selectedHome = self.selectedHMHome { // this should always be true
+            refreshSelectedHomeData(for: selectedHome)
+        } else {
+            clearSelectedHomeData()
+        }
     }
-    
-    // MARK: Delegate Callbacks
-    
+
+    // MARK: Delegate Callbacks (HMHomeManager)
+
     /// Fired when the manager has loaded / changed its list of Homes.
     /// "manager" parameter is the exact manager who triggered this callback.
     ///
     /// Required by HMHomeManagerDelegate
     func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
         // Publish updated Homes to our HomeStore instance
-        let mappedHomes: [HomeModel] = manager.homes.map { home in
-            HomeKitMapper.homeModel(from: home)
-        }
-        
-        store.replaceHomes(with: mappedHomes)
+        refreshAllHomes(from: manager)
 
         // Apply delegates to all Homes to keep all changes synced at all times
         for home in manager.homes {
@@ -100,7 +100,11 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate {
         }
 
         // Apply selected Home's children to local HomeStore
-        refreshSelectedHomeData()
+        if let selectedHome = self.selectedHMHome { // this should always be true
+            refreshSelectedHomeData(for: selectedHome)
+        } else {
+            clearSelectedHomeData()
+        }
 
         // we're done loading; set state = ready if we're authorized
         if manager.authorizationStatus.contains(.restricted) {
@@ -121,29 +125,125 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate {
         // if callbacks arrive out of order...
     }
 
+    // MARK: Delegate Callbacks (HMHome)
+
+    /// Handle Home rename actions (update local store)
+    func homeDidUpdateName(_ home: HMHome) {
+        refreshAllHomes(from: homeManager)
+    }
+
+    /// Handle Room rename for selected Home (refresh local store data)
+    func home(_ home: HMHome,
+              didUpdateNameFor room: HMRoom) {
+        guard home.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeRooms(for: self.selectedHMHome)
+    }
+
+    /// Handle Room addition
+    func home(_ home: HMHome,
+              didAdd room: HMRoom) {
+        guard home.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeData(for: home)
+    }
+
+    /// Handle Room removal
+    func home(_ home: HMHome,
+              didRemove room: HMRoom) {
+        guard home.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeData(for: home)
+    }
+
+    // MARK: Delegate Callbacks (HMAccessory)
+
+    /// Handle Accessory addition
+    func home(_ home: HMHome, didAdd accessory: HMAccessory) {
+        guard home.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeData(for: home)
+    }
+
+    /// Handle Accessory removal
+    func home(_ home: HMHome, didRemove accessory: HMAccessory) {
+        guard home.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeData(for: home)
+    }
+
     // MARK: Private Helpers
-    
+
+    /// Maps manager.homes => HomeModel; calls store.replaceHomes()
+    ///
+    /// Requires HMHomeManager parameter to allow delegate callers using their generated params
+    private func refreshAllHomes(from manager: HMHomeManager) {
+        let mappedHomes: [HomeModel] = manager.homes.map { home in
+            HomeKitMapper.homeModel(from: home)
+        }
+
+        store.replaceHomes(with: mappedHomes)
+    }
+
+    private func clearSelectedHomeData() {
+        store.rooms = []
+        store.accessories = []
+        store.services = []
+        store.scenes = []
+        store.cameras = []
+    }
+
     /// Retrieve a HomeKit.HMHome's child .rooms/.accessories/.services/.scenes/.cameras,
     /// map them to HomePlus \*Models,
     /// & apply to HomeKitRepository's local HomeStore properties
     /// (rooms, accessories, services, scenes, cameras)
-    private func refreshSelectedHomeData() {
-        if let home = self.selectedHMHome {
-            // Rooms
+    private func refreshSelectedHomeData(for selectedHome: HMHome) {
+        refreshSelectedHomeRooms(for: selectedHome)
+        refreshSelectedHomeAccessories(for: selectedHome)
+        refreshSelectedHomeServices(for: selectedHome)
+        refreshSelectedHomeScenes(for: selectedHome)
+        refreshSelectedHomeCameras(for: selectedHome)
+    }
+
+    /// Retrieve + map Rooms; apply to local HomeStore
+    private func refreshSelectedHomeRooms(for selectedHome: HMHome? = nil) {
+        if let home = selectedHome {
             let mappedRooms: [RoomModel] = home.rooms.map { room in
                 HomeKitMapper.roomModel(from: room)
             }
 
             store.rooms = mappedRooms
-            
-            // Accessories
+        } else {
+            store.rooms = []
+        }
+    }
+
+    /// Retrieve + map Accessories; apply to local HomeStore
+    private func refreshSelectedHomeAccessories(for selectedHome: HMHome? = nil) {
+        if let home = selectedHome {
             let mappedAccessories: [AccessoryModel] = home.accessories.map { accessory in
                 HomeKitMapper.accessoryModel(from: accessory)
             }
 
             store.accessories = mappedAccessories
+        } else {
+            store.accessories = []
+        }
+    }
 
-            // Services
+    /// Retrieve + map Services; apply to local HomeStore
+    private func refreshSelectedHomeServices(for selectedHome: HMHome? = nil) {
+        if let home = selectedHome {
             var services: [ServiceModel] = []
 
             for accessory in home.accessories {
@@ -160,8 +260,14 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate {
             }
 
             store.services = services
+        } else {
+            store.services = []
+        }
+    }
 
-            // Scenes
+    /// Retrieve + map Scenes; apply to local HomeStore
+    private func refreshSelectedHomeScenes(for selectedHome: HMHome? = nil) {
+        if let home = selectedHome {
             let filteredActionSets = home.actionSets.filter { actionSet in
                 actionSet.actionSetType != HMActionSetTypeTriggerOwned
                     && !actionSet.actions.isEmpty
@@ -172,23 +278,25 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate {
             }
 
             store.scenes = mappedScenes
+        } else {
+            store.scenes = []
+        }
+    }
 
-            // Cameras
+    /// Retrieve + map Cameras; apply to local HomeStore
+    private func refreshSelectedHomeCameras(for selectedHome: HMHome? = nil) {
+        if let home = selectedHome {
             var cameras: [CameraModel] = []
 
             for accessory in home.accessories {
                 for cameraProfile in accessory.cameraProfiles ?? [] {
-                    cameras.append(HomeKitMapper.cameraModel(from: cameraProfile, accessory: accessory))
+                    cameras.append(HomeKitMapper.cameraModel(from: cameraProfile,
+                                                             accessory: accessory))
                 }
             }
 
             store.cameras = cameras
-
         } else {
-            store.rooms = []
-            store.accessories = []
-            store.services = []
-            store.scenes = []
             store.cameras = []
         }
     }
