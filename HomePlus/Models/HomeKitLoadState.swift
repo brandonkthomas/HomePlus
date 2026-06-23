@@ -7,6 +7,7 @@
 
 enum HomeKitLoadState: Equatable {
     case loading
+    /// Ready = lifecycle load is completed; does not describe non-empty data
     case ready
     case unauthorized
 }

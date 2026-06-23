@@ -11,7 +11,9 @@ import Observation
 //
 // - "final" prevents subclasses (i.e. C# "sealed"); should use this always by default
 // - @Observable (modern) is a macro... compiler generates SwiftUI prop tracking automatically;
-//   "... class ClassName: ObservableObject" is prev approach + requires "@Published" props
+//     "... class ClassName: ObservableObject" is prev approach + requires "@Published" props
+//   @Observable observes store-owned mutations ONLY in this case; does not carry over to
+//     detached copies.
 //
 /// Observable instance holding current app state.
 /// See HomeKitRepository for more documentation.
@@ -87,13 +89,13 @@ final class HomeStore {
             return // service not found; nothing to do
         }
                 
-        guard services[index].capabilities.supportsPower else {
+        guard self.services[index].capabilities.supportsPower else {
             return // service doesn't support power toggle; nothing to do
         }
         
-        let currentState = services[index].values.isOn ?? false // treat nil == false
-        
-        services[index].values.isOn = !currentState // flip current state
+        let currentState = self.services[index].values.isOn ?? false // treat nil == false
+
+        self.services[index].values.isOn = !currentState // flip current state
     }
     
     // MARK: Private Helpers

@@ -275,10 +275,12 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
     }
 
     /// An Accessory's subscribed/notifying Characteristic was updated
-    func accessory(
-        _ accessory: HMAccessory,
-        service: HMService,
-        didUpdateValueFor characteristic: HMCharacteristic) {
+    ///
+    /// This only provides a place to receive an update; does not request updates.
+    /// Need to also call .enableNotification(true) ... HK model separates handler + subscriber
+    func accessory(_ accessory: HMAccessory,
+                   service: HMService,
+                   didUpdateValueFor characteristic: HMCharacteristic) {
         guard let accessoryHome = accessory.home,
               accessoryHome.uniqueIdentifier == store.selectedHome?.id else {
             return
@@ -411,7 +413,11 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
                     let mappedService: ServiceModel = HomeKitMapper.serviceModel(from: service,
                                                                                  accessory: accessory)
 
-                    if case .unsupported = mappedService.kind { // if case in Swift is backwards :(
+                    // if case in Swift is backwards :(  this essentially means:
+                    //   If mappedService.kind matches .unsupported enum case,
+                    //   regardless of its associated string, then continue
+                    // We ignore the .unsupported(String) in this instance.
+                    if case .unsupported = mappedService.kind {
                         continue
                     }
 
@@ -426,6 +432,8 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
     }
 
     /// Retrieve + map Scenes; apply to local HomeStore
+    ///
+    /// Only retrieve ActionSets which are *not* trigger-owned and *not* empty
     private func refreshSelectedHomeScenes(for selectedHome: HMHome? = nil) {
         if let home = selectedHome {
             let filteredActionSets = home.actionSets.filter { actionSet in
@@ -469,15 +477,20 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
 
         for service in accessory.services {
             for characteristic in service.characteristics {
+
+                // Do we even need to subscribe to this (does ServiceValues support it)?
                 if HomeKitTypes.Characteristic.observedTypes.contains(characteristic.characteristicType) {
                     characteristic.enableNotification(true) { error in
                         if let error {
+                            // lower "self" refers to this instance
+                            // capital "Self" refers to this instance's Type
                             Self.logger.error(
                                 "Failed to enable notifications for \(characteristic.characteristicType, privacy: .public): \(error.localizedDescription, privacy: .public)"
                             )
                         }
                     }
-                } // close: if
+                }
+
             } // close: for char
         } // close: for service
 

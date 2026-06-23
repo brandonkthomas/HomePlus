@@ -7,6 +7,9 @@
 
 import HomeKit
 
+/// Mapper functions for HomeKit objects => HomePlus local instances.
+///
+/// NOTE: Mapping in the inverse direction is not possible/not supported.
 enum HomeKitMapper { // enum: pseudo-namespace since we do not need instances here (fully static)
     
     /// Maps a string => HomePlus.ServiceKind enum
@@ -111,6 +114,8 @@ enum HomeKitMapper { // enum: pseudo-namespace since we do not need instances he
             characteristic.characteristicType
         })
 
+        // Build a dict of characteristic types (light's color temp, brightness...) + their values
+        // Service (Garage Door Opener) => Characteristic (Light) => charType/value
         let valuesByType = service.characteristics.reduce(into: [String: Any]()) {
             dictionary, characteristic in // assign aliases
 

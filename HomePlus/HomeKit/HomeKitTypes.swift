@@ -97,6 +97,8 @@ enum HomeKitTypes {
         static let currentSlatState: String = "000000AA-0000-1000-8000-0026BB765291"
 
         /// Which Characteristics need notifications?
+        ///
+        /// Currently matches what is possible to store in ServiceValues
         static let observedTypes: Set<String> = [ // Set rather than [] for efficient/unique .contains() lookup
             Characteristic.powerState,
             Characteristic.active,
