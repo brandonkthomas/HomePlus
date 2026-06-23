@@ -7,6 +7,7 @@
 
 import Foundation
 import HomeKit
+import OSLog
 
 /// Repository for live HK objects (isolates from app-facing models).
 ///
@@ -44,7 +45,13 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
     // public functions.
     private let homeManager: HMHomeManager
     private let store: HomeStore
-    
+
+    /// Shared logger
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "HomePlus",
+        category: "HomeKitRepository"
+    )
+
     // MARK: Properties (Calculated)
 
     /// Retrieve HomeStore's selected Home mapped to HomeKit.HMHome (calculated)
@@ -100,9 +107,10 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
         for home in manager.homes {
             home.delegate = self
 
-            // Establish subscription to this accessory's delegate
+            // Establish subscription to + notifications for this accessory's delegate
             for accessory in home.accessories {
                 accessory.delegate = self
+                enableNotifications(for: accessory)
             }
         }
 
@@ -172,9 +180,11 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
     // MARK: Delegate Callbacks (HMAccessory)
 
     /// Handle Accessory addition
-    func home(_ home: HMHome, didAdd accessory: HMAccessory) {
+    func home(_ home: HMHome,
+              didAdd accessory: HMAccessory) {
         // Assign before anything else so that additions to unselected homes are still tracked
         accessory.delegate = self
+        enableNotifications(for: accessory)
 
         guard home.uniqueIdentifier == store.selectedHome?.id else {
             return
@@ -184,7 +194,8 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
     }
 
     /// Handle Accessory removal
-    func home(_ home: HMHome, didRemove accessory: HMAccessory) {
+    func home(_ home: HMHome,
+              didRemove accessory: HMAccessory) {
         guard home.uniqueIdentifier == store.selectedHome?.id else {
             return
         }
@@ -216,7 +227,8 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
     }
 
     /// An Accessory Service's name was updated
-    func accessory(_ accessory: HMAccessory, didUpdateNameFor service: HMService) {
+    func accessory(_ accessory: HMAccessory,
+                   didUpdateNameFor service: HMService) {
         guard let accessoryHome = accessory.home,
               accessoryHome.uniqueIdentifier == store.selectedHome?.id else {
             return
@@ -234,6 +246,8 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
 
         refreshSelectedHomeServices(for: accessoryHome)
         refreshSelectedHomeCameras(for: accessoryHome) // hasMotionSensor derives from camera profile services
+
+        enableNotifications(for: accessory)
     }
 
     /// A generic Accessory Profile was added to an Accessory
@@ -289,7 +303,8 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
     // MARK: Delegate Callbacks (HMActionSet)
 
     /// An ActionSet (scene) was added
-    func home(_ home: HMHome, didAdd actionSet: HMActionSet) {
+    func home(_ home: HMHome,
+              didAdd actionSet: HMActionSet) {
         guard home.uniqueIdentifier == store.selectedHome?.id else {
             return
         }
@@ -298,7 +313,8 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
     }
 
     /// An ActionSet (scene) was removed
-    func home(_ home: HMHome, didRemove actionSet: HMActionSet) {
+    func home(_ home: HMHome,
+              didRemove actionSet: HMActionSet) {
         guard home.uniqueIdentifier == store.selectedHome?.id else {
             return
         }
@@ -307,7 +323,8 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
     }
 
     /// An ActionSet (scene) was renamed
-    func home(_ home: HMHome, didUpdateNameFor actionSet: HMActionSet) {
+    func home(_ home: HMHome,
+              didUpdateNameFor actionSet: HMActionSet) {
         guard home.uniqueIdentifier == store.selectedHome?.id else {
             return
         }
@@ -316,7 +333,8 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
     }
 
     /// An ActionSet (scene) had its Actions modified
-    func home(_ home: HMHome, didUpdateActionsFor actionSet: HMActionSet) {
+    func home(_ home: HMHome,
+              didUpdateActionsFor actionSet: HMActionSet) {
         guard home.uniqueIdentifier == store.selectedHome?.id else {
             return
         }
@@ -324,7 +342,7 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
         refreshSelectedHomeScenes(for: home)
     }
 
-    // MARK: Private Helpers
+    // MARK: Private Helpers (Refresh)
 
     /// Maps manager.homes => HomeModel; calls store.replaceHomes()
     ///
@@ -441,5 +459,27 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, 
         } else {
             store.cameras = []
         }
+    }
+
+    // MARK: Private Helpers (Notifications)
+
+    /// Loop thru Accessory's Service's Characteristics
+    /// & subscribe to notifications for those supported
+    private func enableNotifications(for accessory: HMAccessory) {
+
+        for service in accessory.services {
+            for characteristic in service.characteristics {
+                if HomeKitTypes.Characteristic.observedTypes.contains(characteristic.characteristicType) {
+                    characteristic.enableNotification(true) { error in
+                        if let error {
+                            Self.logger.error(
+                                "Failed to enable notifications for \(characteristic.characteristicType, privacy: .public): \(error.localizedDescription, privacy: .public)"
+                            )
+                        }
+                    }
+                } // close: if
+            } // close: for char
+        } // close: for service
+
     }
 }
