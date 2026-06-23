@@ -26,7 +26,9 @@ import Observation
 /// SwiftUI views
 @Observable
 final class HomeStore {
-    
+
+    // TODO: Ensure only HomeKitRepository can call data-writing funcs in this class
+
     // MARK: Properties
     
     /// Collection of all Homes available to us
