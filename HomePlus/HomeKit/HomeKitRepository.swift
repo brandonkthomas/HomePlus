@@ -34,8 +34,9 @@ import HomeKit
 ///   - Store changes
 ///   - View redraws
 ///
-/// NSObject is inherited to provide Objective-C interop for HK delegates (HMHomeManagerDelegate, HMHomeDelegate).
-final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate {
+/// NSObject is inherited to provide Objective-C interop for HK delegates (HMHomeManagerDelegate, HMHomeDelegate,
+/// HMAccessoryDelegate).
+final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, HMAccessoryDelegate {
 
     // MARK: Properties
     
@@ -77,7 +78,7 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate {
         store.selectHome(home)
 
         // Apply selected Home's children to local HomeStore
-        if let selectedHome = self.selectedHMHome { // this should always be true
+        if let selectedHome = self.selectedHMHome { // user has no homes / last home removed / auth changed
             refreshSelectedHomeData(for: selectedHome)
         } else {
             clearSelectedHomeData()
@@ -94,16 +95,22 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate {
         // Publish updated Homes to our HomeStore instance
         refreshAllHomes(from: manager)
 
-        // Apply delegates to all Homes to keep all changes synced at all times
+        // Establish subscription to all Homes' delegates
+        //  (to keep all changes synced at all times)
         for home in manager.homes {
             home.delegate = self
+
+            // Establish subscription to this accessory's delegate
+            for accessory in home.accessories {
+                accessory.delegate = self
+            }
         }
 
         // Apply selected Home's children to local HomeStore
-        if let selectedHome = self.selectedHMHome { // this should always be true
+        if let selectedHome = self.selectedHMHome {
             refreshSelectedHomeData(for: selectedHome)
         } else {
-            clearSelectedHomeData()
+            clearSelectedHomeData() // user has no homes / last home removed / auth changed
         }
 
         // we're done loading; set state = ready if we're authorized
@@ -139,7 +146,7 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate {
             return
         }
 
-        refreshSelectedHomeRooms(for: self.selectedHMHome)
+        refreshSelectedHomeRooms(for: home)
     }
 
     /// Handle Room addition
@@ -166,6 +173,9 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate {
 
     /// Handle Accessory addition
     func home(_ home: HMHome, didAdd accessory: HMAccessory) {
+        // Assign before anything else so that additions to unselected homes are still tracked
+        accessory.delegate = self
+
         guard home.uniqueIdentifier == store.selectedHome?.id else {
             return
         }
@@ -180,6 +190,138 @@ final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate {
         }
 
         refreshSelectedHomeData(for: home)
+    }
+
+    /// An Accessory's reachability state was updated
+    func accessoryDidUpdateReachability(_ accessory: HMAccessory) {
+        guard let accessoryHome = accessory.home,
+              accessoryHome.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeAccessories(for: accessoryHome)
+        refreshSelectedHomeServices(for: accessoryHome)
+    }
+
+    /// An Accessory's name was updated
+    func accessoryDidUpdateName(_ accessory: HMAccessory) {
+        guard let accessoryHome = accessory.home,
+              accessoryHome.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeAccessories(for: accessoryHome)
+        refreshSelectedHomeServices(for: accessoryHome)
+        refreshSelectedHomeCameras(for: accessoryHome)
+    }
+
+    /// An Accessory Service's name was updated
+    func accessory(_ accessory: HMAccessory, didUpdateNameFor service: HMService) {
+        guard let accessoryHome = accessory.home,
+              accessoryHome.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeServices(for: accessoryHome)
+    }
+
+    /// An Accessory's Service collection was updated
+    func accessoryDidUpdateServices(_ accessory: HMAccessory) {
+        guard let accessoryHome = accessory.home,
+              accessoryHome.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeServices(for: accessoryHome)
+        refreshSelectedHomeCameras(for: accessoryHome) // hasMotionSensor derives from camera profile services
+    }
+
+    /// A generic Accessory Profile was added to an Accessory
+    /// (could / could not be a Camera Profile)
+    func accessory(_ accessory: HMAccessory,
+                   didAdd profile: HMAccessoryProfile) {
+        guard let accessoryHome = accessory.home,
+              accessoryHome.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeCameras(for: accessoryHome)
+    }
+
+    /// A generic Accessory Profile was removed from an Accessory
+    /// (could / could not be a Camera Profile)
+    func accessory(_ accessory: HMAccessory,
+                   didRemove profile: HMAccessoryProfile) {
+        guard let accessoryHome = accessory.home,
+              accessoryHome.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+        
+        refreshSelectedHomeCameras(for: accessoryHome)
+    }
+
+    /// An Accessory's subscribed/notifying Characteristic was updated
+    func accessory(
+        _ accessory: HMAccessory,
+        service: HMService,
+        didUpdateValueFor characteristic: HMCharacteristic) {
+        guard let accessoryHome = accessory.home,
+              accessoryHome.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeServices(for: accessoryHome)
+    }
+
+    // MARK: Delegate Callbacks (HMRoom)
+
+    /// An Accessory was assigned to a different Room
+    func home(_ home: HMHome,
+              didUpdate room: HMRoom,
+              for accessory: HMAccessory) {
+        guard home.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeData(for: home)
+    }
+
+    // MARK: Delegate Callbacks (HMActionSet)
+
+    /// An ActionSet (scene) was added
+    func home(_ home: HMHome, didAdd actionSet: HMActionSet) {
+        guard home.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeScenes(for: home)
+    }
+
+    /// An ActionSet (scene) was removed
+    func home(_ home: HMHome, didRemove actionSet: HMActionSet) {
+        guard home.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeScenes(for: home)
+    }
+
+    /// An ActionSet (scene) was renamed
+    func home(_ home: HMHome, didUpdateNameFor actionSet: HMActionSet) {
+        guard home.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeScenes(for: home)
+    }
+
+    /// An ActionSet (scene) had its Actions modified
+    func home(_ home: HMHome, didUpdateActionsFor actionSet: HMActionSet) {
+        guard home.uniqueIdentifier == store.selectedHome?.id else {
+            return
+        }
+
+        refreshSelectedHomeScenes(for: home)
     }
 
     // MARK: Private Helpers

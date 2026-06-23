@@ -1,6 +1,6 @@
 //
-//  HomePlusTests.swift
-//  HomePlusTests
+//  HomeKitMapperTests.swift
+//  HomeKitMapperTests
 //
 //  Created by Brandon Thomas on 6/13/26.
 //

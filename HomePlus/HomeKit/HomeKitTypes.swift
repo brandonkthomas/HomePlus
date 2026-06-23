@@ -95,5 +95,14 @@ enum HomeKitTypes {
         static let targetTiltAngle: String = "000000C2-0000-1000-8000-0026BB765291"
         static let slatType: String = "000000C0-0000-1000-8000-0026BB765291"
         static let currentSlatState: String = "000000AA-0000-1000-8000-0026BB765291"
+
+        /// Which Characteristics need notifications?
+        static let observedTypes: Set<String> = [ // Set rather than [] for efficient/unique .contains() lookup
+            Characteristic.powerState,
+            Characteristic.active,
+            Characteristic.brightness,
+            Characteristic.currentPosition,
+            Characteristic.currentTemperature
+        ]
     }
 }

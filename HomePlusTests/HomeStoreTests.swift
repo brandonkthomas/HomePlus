@@ -1,6 +1,6 @@
 //
-//  HomePlusTests.swift
-//  HomePlusTests
+//  HomeStoreTests.swift
+//  HomeStoreTests
 //
 //  Created by Brandon Thomas on 6/13/26.
 //

@@ -1,6 +1,6 @@
 //
-//  HomePlusTests.swift
-//  HomePlusTests
+//  CharacteristicValueTests.swift
+//  CharacteristicValueTests
 //
 //  Created by Brandon Thomas on 6/13/26.
 //

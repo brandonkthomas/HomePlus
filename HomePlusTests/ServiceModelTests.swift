@@ -1,6 +1,6 @@
 //
-//  HomePlusTests.swift
-//  HomePlusTests
+//  ServiceModelTests.swift
+//  ServiceModelTests
 //
 //  Created by Brandon Thomas on 6/13/26.
 //
