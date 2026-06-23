@@ -6,75 +6,72 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
 
+    // MARK: Properties (Private)
+
+    @Environment(HomeStore.self) private var store: HomeStore
+
+    /// Map store's homeKitLoadState to String
+    private var loadStateText: String {
+        switch store.homeKitLoadState {
+        case .loading:
+            "Loading"
+        case .ready:
+            "Connected"
+        case .unauthorized:
+            "Unauthorized"
+        }
+    }
+
+    // MARK: Views
+
+    /// Initial view
+    ///
+    /// "some View": opaque type
     var body: some View {
-        NavigationViewWrapper {
+        NavigationStack {
             List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-#if os(macOS)
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-#endif
-            .toolbar {
-#if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-#endif
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                Section("Homes") {
+                    ForEach(store.homes) { home in
+                        Button {
+                            store.selectHome(home)
+                        } label: {
+                            HStack {
+                                Text(home.name)
+                                Spacer()
+
+                                if store.selectedHome?.id == home.id {
+                                    Text("Selected")
+                                }
+                            }
+                        }
                     }
                 }
             }
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
+            .navigationTitle(store.selectedHome?.name ?? "HomePlus")
+            .navigationSubtitle(loadStateText) // added in iOS 26
         }
     }
 }
 
-fileprivate struct NavigationViewWrapper<Content: View>: View {
-    let content: () -> Content
+// MARK: Xcode Canvas Preview
 
-    var body: some View {
-#if os(macOS)
-        NavigationSplitView {
-            content()
-        } detail: {
-            Text("Select an item")
-        }
-#else
-        content()
-#endif
-    }
+private var previewStore: HomeStore {
+    let store = HomeStore()
+
+    let home1 = HomeModel(id: UUID(), name: "My Home")
+    let home2 = HomeModel(id: UUID(), name: "Vacation Home")
+
+    store.homeKitLoadState = .ready
+    store.homes = [home1, home2]
+    store.selectedHome = home1
+
+    return store
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .environment(previewStore)
 }

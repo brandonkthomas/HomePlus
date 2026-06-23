@@ -6,27 +6,36 @@
 //
 
 import SwiftUI
-import SwiftData
 
-@main
+@main // app entry point; aka "start process using this type"
 struct HomePlusApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    // MARK: Properties (Private)
 
+    /// Single app-wide instance of AppEnvironment;
+    /// which in turn handles one instance each of HomeKitRepository + HomeStore.
+    ///
+    /// @State: SwiftUI owns/preserves this value across view/app refreshes;
+    /// its changes can trigger UI updates.
+    /// SwiftUI can recreate value structs during render lifecycle. @State allows for
+    /// "storage" outside the transient struct values.
+    /// AppEnvironment is a class (ref obj) so @State preserves ref to this specific instance.
+    ///
+    /// This is a "var" because @State is a property wrapper which requires "var".
+    /// SwiftUI needs writable framework-managed storage behind the scenes;
+    /// does not mean we expect to replace appEnvironment.
+    @State private var appEnvironment = AppEnvironment()
+
+    // MARK: Properties (Public)
+
+    /// Initial body.
+    ///
+    /// "some Scene": this is some other type which conforms to the Scene protocol.
+    /// WindowGroup is a Scene that presents a group of identically structured windows.
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(appEnvironment.store) // inject @Observable HomeStore instance
         }
-        .modelContainer(sharedModelContainer)
     }
 }
