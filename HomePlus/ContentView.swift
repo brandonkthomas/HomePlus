@@ -7,17 +7,22 @@
 
 import SwiftUI
 
+/// Reads HomeStore + calls HomeCommands (HomeKitRepository in prod; PreviewHomeCommands in preview)
 struct ContentView: View {
 
     // MARK: Properties (Private)
 
+    /// Read appEnvironment.store environment value from current view environment
     @Environment(HomeStore.self) private var store: HomeStore
+
+    /// Read homeCommands environment value from current view environment
+    @Environment(\.homeCommands) private var homeCommands: any HomeCommands
 
     /// Map store's homeKitLoadState to String
     private var loadStateText: String {
         switch store.homeKitLoadState {
         case .loading:
-            "Loading"
+            "Connecting..."
         case .ready:
             "Connected"
         case .unauthorized:
@@ -36,7 +41,8 @@ struct ContentView: View {
                 Section("Homes") {
                     ForEach(store.homes) { home in
                         Button {
-                            store.selectHome(home)
+                            // SwiftUI observes store.selectedHome + redraws view on change
+                            homeCommands.selectHome(home)
                         } label: {
                             HStack {
                                 Text(home.name)
@@ -71,7 +77,13 @@ private var previewStore: HomeStore {
     return store
 }
 
+// ContentView reads from store
+// PreviewHomeCommands mutates that same store
+// SwiftUI observes the mutation and updates the preview
 #Preview {
+    let store = previewStore
+
     ContentView()
-        .environment(previewStore)
+        .environment(store)
+        .environment(\.homeCommands, PreviewHomeCommands(store: store))
 }

@@ -37,8 +37,10 @@ import OSLog
 ///
 /// NSObject is inherited to provide Objective-C interop for HK delegates (HMHomeManagerDelegate, HMHomeDelegate,
 /// HMAccessoryDelegate).
-final class HomeKitRepository: NSObject, HMHomeManagerDelegate, HMHomeDelegate, HMAccessoryDelegate {
-
+final class HomeKitRepository:
+    NSObject, HMHomeManagerDelegate, HMHomeDelegate, HMAccessoryDelegate,
+    HomeCommands
+{
     // MARK: Properties
     
     // External callers can interact w/ homeManager + store *only indirectly* through repo's

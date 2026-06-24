@@ -32,10 +32,14 @@ struct HomePlusApp: App {
     ///
     /// "some Scene": this is some other type which conforms to the Scene protocol.
     /// WindowGroup is a Scene that presents a group of identically structured windows.
+    ///
+    /// appEnvironment.store is @Observable HomeStore instance.
+    /// \.homeCommands: Set this env value to appEnvironment.commands for this view subtree
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environment(appEnvironment.store) // inject @Observable HomeStore instance
+                .environment(\.homeCommands, appEnvironment.commands) // inject @Observable AppEnvironment.commands instance
         }
     }
 }
