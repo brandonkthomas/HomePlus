@@ -38,10 +38,22 @@ struct ContentView: View {
 
     // MARK: Views
 
-    /// Initial view
+    /// Primary view
     ///
     /// "some View": opaque type
     var body: some View {
+        TabView {
+            Tab("Home", systemImage: "house.fill") {
+                homeTab
+            }
+            Tab("Cameras", systemImage: "camera.fill") {
+                camerasTab
+            }
+        }.tabBarMinimizeBehavior(TabBarMinimizeBehavior.onScrollDown) // added in iOS 26
+    }
+
+    /// Tab 1: Home
+    var homeTab: some View {
         NavigationStack {
             List {
                 Section("Homes") {
@@ -50,14 +62,8 @@ struct ContentView: View {
                             // SwiftUI observes store.selectedHome + redraws view on change
                             homeCommands.selectHome(home)
                         } label: {
-                            HStack {
-                                Text(home.name)
-                                Spacer()
-
-                                if store.selectedHome?.id == home.id {
-                                    Text("Selected")
-                                }
-                            }
+                            let isSelected = home.id == store.selectedHome?.id
+                            HomeRowView(home: home, isSelected: isSelected)
                         }
                     }
                 }
@@ -66,17 +72,40 @@ struct ContentView: View {
             .navigationSubtitle(loadStateText) // added in iOS 26
         }
     }
+
+    /// Tab 2: Cameras
+    var camerasTab: some View {
+        Text("Todo")
+    }
+}
+
+/// View: Row for a specific Home w/ Selected status
+private struct HomeRowView: View {
+
+    let home: HomeModel
+    let isSelected: Bool
+
+    var body: some View {
+        HStack {
+            Text(home.name)
+            Spacer()
+
+            if isSelected {
+                Text("Selected")
+            }
+        }
+    }
 }
 
 // MARK: Xcode Canvas Preview
 
-private var previewStore: HomeStore {
+private func createPreviewStore(state homeKitLoadState: HomeKitLoadState) -> HomeStore {
     let store = HomeStore()
 
     let home1 = HomeModel(id: UUID(), name: "My Home")
     let home2 = HomeModel(id: UUID(), name: "Vacation Home")
 
-    store.homeKitLoadState = .ready
+    store.homeKitLoadState = homeKitLoadState
     store.homes = [home1, home2]
     store.selectedHome = home1
 
@@ -86,8 +115,16 @@ private var previewStore: HomeStore {
 // ContentView reads from store
 // PreviewHomeCommands mutates that same store
 // SwiftUI observes the mutation and updates the preview
-#Preview {
-    let store = previewStore
+#Preview("Ready") {
+    let store = createPreviewStore(state: .ready)
+
+    ContentView()
+        .environment(store)
+        .environment(\.homeCommands, PreviewHomeCommands(store: store))
+}
+
+#Preview("Loading") {
+    let store = createPreviewStore(state: .loading)
 
     ContentView()
         .environment(store)
