@@ -13,9 +13,15 @@ struct ContentView: View {
     // MARK: Properties (Private)
 
     /// Read appEnvironment.store environment value from current view environment
+    ///
+    /// Don't need "\." here because this is a type-based lookup for an observable object
+    /// placed into the environment: .environment(store))
     @Environment(HomeStore.self) private var store: HomeStore
 
     /// Read homeCommands environment value from current view environment
+    ///
+    /// Need "\." because this is a key-path lookup for a custom environment value:
+    /// .environment(\.homeCommands, commands)
     @Environment(\.homeCommands) private var homeCommands: any HomeCommands
 
     /// Map store's homeKitLoadState to String
