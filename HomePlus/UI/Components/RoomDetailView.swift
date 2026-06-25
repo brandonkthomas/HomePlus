@@ -28,6 +28,7 @@ struct RoomDetailView: View {
                     }
                 }
             }
+            .listStyle(.insetGrouped)
             .navigationTitle(room.name)
         }
     }
@@ -36,18 +37,25 @@ struct RoomDetailView: View {
 // MARK: Xcode Canvas Previews
 
 #Preview("Populated") {
+    let store = PreviewFixtures.makeStore(homeKitLoadState: .ready)
+
+    if let room = store.rooms.first {
+        RoomDetailView(room: room,
+                       services: store.services)
+    }
+}
+
+#Preview("Unreachable") {
     let room = PreviewFixtures.livingRoom()
     let accessory = PreviewFixtures.floorLampAccessory(roomID: room.id)
-    let service = PreviewFixtures.floorLampService(roomID: room.id,
-                                                   accessory: accessory)
-    
+    let service = PreviewFixtures.unreachableLightService(roomID: room.id,
+                                                          accessory: accessory)
     RoomDetailView(room: room,
                    services: [service])
 }
 
 #Preview("Empty") {
     let room = PreviewFixtures.livingRoom()
-
     RoomDetailView(room: room,
                    services: [])
 }

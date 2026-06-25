@@ -68,4 +68,11 @@ struct ServiceValues: Equatable {
     var position: Double? = nil
     var temperature: Double? = nil
     var statusText: String? = nil
+
+    // MARK: Computed Variables
+
+    /// Do we have a position value & is it greater than 0? (read-only)
+    var hasOpenPosition: Bool {
+        (position ?? 0) > 0
+    }
 }

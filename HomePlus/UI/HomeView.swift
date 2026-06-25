@@ -55,6 +55,16 @@ struct HomeView: View {
         }
     }
 
+//    @ToolbarContentBuilder
+//    func toolbarItems() -> some ToolbarContent {
+//        ToolbarItem(placement: .primaryAction) {
+//            Button("Save") { /* Action */ }
+//        }
+//        ToolbarItem(placement: .cancellationAction) {
+//            Button("Cancel") { /* Action */ }
+//        }
+//    }
+
     var body: some View {
         NavigationStack {
             if store.homes.isEmpty {
@@ -85,6 +95,7 @@ struct HomeView: View {
                                 NavigationLink {
                                     RoomDetailView(room: room,
                                                    services: store.services(in: room))
+                                    .navigationBarTitleDisplayMode(.inline)
                                 } label: {
                                     Label(room.name, systemImage: "square.split.bottomrightquarter.fill")
                                 }
@@ -95,6 +106,11 @@ struct HomeView: View {
                 .listStyle(.insetGrouped)
                 .navigationTitle(store.selectedHome?.name ?? "HomePlus")
                 .navigationSubtitle(loadStateText) // added in iOS 26
+                .toolbar {
+                    ToolbarItemGroup(placement: .primaryAction) {
+                        Image(systemName: "ellipsis")
+                    }
+                }
             }
         }
     }
