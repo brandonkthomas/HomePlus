@@ -29,21 +29,39 @@ struct HomeTabView: View {
     private var emptyStoreText: String {
         switch store.homeKitLoadState {
         case .unauthorized:
-            "Home access is denied."
+            "No Access"
         default:
-            "No Homes found."
+            "No Homes"
+        }
+    }
+
+    /// Description message shown when there are no homes
+    private var emptyStoreDescription: String {
+        switch store.homeKitLoadState {
+        case .unauthorized:
+            "HomePlus requires Apple Home access."
+        default:
+            "You have no configured Homes."
+        }
+    }
+
+    /// Description message shown when there are no homes
+    private var emptyStoreImage: String {
+        switch store.homeKitLoadState {
+        case .unauthorized:
+            "hand.raised.slash.fill"
+        default:
+            "house.slash.fill"
         }
     }
 
     var body: some View {
         NavigationStack {
             if store.homes.isEmpty {
-                VStack {
-                    Image(systemName: "house.slash.fill")
-                        .font(.system(size: 24, weight: .medium))
-                        .padding(8)
-                    Text(emptyStoreText)
-                        .font(.system(size: 12, weight: .medium))
+                ContentUnavailableView {
+                    Label(emptyStoreText, systemImage: emptyStoreImage)
+                } description: {
+                    Text(emptyStoreDescription)
                 }
             } else {
                 List {
@@ -66,31 +84,36 @@ struct HomeTabView: View {
     }
 }
 
-/// View: Row for a specific Home w/ Selected status
-private struct HomeRowView: View {
+// MARK: Xcode Canvas Previews
 
-    let home: HomeModel
-    let isSelected: Bool
-
-    var body: some View {
-        HStack {
-            Text(home.name)
-            Spacer()
-
-            if isSelected {
-                Image(systemName: "checkmark")
-            }
-        }
-    }
-}
-
-// MARK: Xcode Canvas Preview
-
-// ContentView reads from store
-// PreviewHomeCommands mutates that same store
-// SwiftUI observes the mutation and updates the preview
 #Preview("Ready") {
     let store = PreviewFixtures.makeStore(homeKitLoadState: .ready)
+    let homeCommands = PreviewHomeCommands(store: store)
+
+    HomeTabView(store: store,
+                homeCommands: homeCommands)
+}
+
+#Preview("Ready (No Homes)") {
+    let store = PreviewFixtures.makeStore(homeKitLoadState: .ready,
+                                          addHomes: false)
+    let homeCommands = PreviewHomeCommands(store: store)
+
+    HomeTabView(store: store,
+                homeCommands: homeCommands)
+}
+
+#Preview("Loading") {
+    let store = PreviewFixtures.makeStore(homeKitLoadState: .loading)
+    let homeCommands = PreviewHomeCommands(store: store)
+
+    HomeTabView(store: store,
+                homeCommands: homeCommands)
+}
+
+#Preview("Unauthorized") {
+    let store = PreviewFixtures.makeStore(homeKitLoadState: .unauthorized,
+                                          addHomes: false)
     let homeCommands = PreviewHomeCommands(store: store)
 
     HomeTabView(store: store,

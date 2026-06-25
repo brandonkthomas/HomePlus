@@ -9,17 +9,15 @@ import SwiftUI
 
 struct CamerasTabView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "clock.fill")
-                .font(.system(size: 24, weight: .medium))
-                .padding(8)
-            Text("Coming Soon")
-                .font(.system(size: 12, weight: .medium))
+        ContentUnavailableView {
+            Label("Coming Soon", systemImage: "clock.fill")
+        } description: {
+            Text("Cameras will be available here in a future release.")
         }
     }
 }
 
-// MARK: Xcode Canvas Preview
+// MARK: Xcode Canvas Previews
 
 #Preview("Ready") {
     CamerasTabView()

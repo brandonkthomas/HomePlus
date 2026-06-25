@@ -43,9 +43,7 @@ struct ContentView: View {
     }
 }
 
-// MARK: Xcode Canvas Preview
-
-
+// MARK: Xcode Canvas Previews
 
 // ContentView reads from store
 // PreviewHomeCommands mutates that same store
