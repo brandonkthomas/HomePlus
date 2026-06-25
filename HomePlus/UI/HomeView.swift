@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// View: Home tab
-struct HomeTabView: View {
+struct HomeView: View {
 
     let store: HomeStore
     let homeCommands: any HomeCommands
@@ -65,6 +65,7 @@ struct HomeTabView: View {
                 }
             } else {
                 List {
+                    // All Homes
                     Section("Homes") {
                         ForEach(store.homes) { home in
                             Button {
@@ -76,7 +77,21 @@ struct HomeTabView: View {
                             }
                         }
                     }
+
+                    // Selected Home's Rooms
+                    if !store.rooms.isEmpty {
+                        Section("Rooms") {
+                            ForEach(store.rooms) { room in
+                                NavigationLink {
+                                    RoomDetailView(room: room)
+                                } label: {
+                                    Label(room.name, systemImage: "square.split.bottomrightquarter.fill")
+                                }
+                            }
+                        }
+                    }
                 }
+                .listStyle(.insetGrouped)
                 .navigationTitle(store.selectedHome?.name ?? "HomePlus")
                 .navigationSubtitle(loadStateText) // added in iOS 26
             }
@@ -90,8 +105,8 @@ struct HomeTabView: View {
     let store = PreviewFixtures.makeStore(homeKitLoadState: .ready)
     let homeCommands = PreviewHomeCommands(store: store)
 
-    HomeTabView(store: store,
-                homeCommands: homeCommands)
+    HomeView(store: store,
+             homeCommands: homeCommands)
 }
 
 #Preview("Ready (No Homes)") {
@@ -99,16 +114,16 @@ struct HomeTabView: View {
                                           addHomes: false)
     let homeCommands = PreviewHomeCommands(store: store)
 
-    HomeTabView(store: store,
-                homeCommands: homeCommands)
+    HomeView(store: store,
+             homeCommands: homeCommands)
 }
 
 #Preview("Loading") {
     let store = PreviewFixtures.makeStore(homeKitLoadState: .loading)
     let homeCommands = PreviewHomeCommands(store: store)
 
-    HomeTabView(store: store,
-                homeCommands: homeCommands)
+    HomeView(store: store,
+             homeCommands: homeCommands)
 }
 
 #Preview("Unauthorized") {
@@ -116,6 +131,6 @@ struct HomeTabView: View {
                                           addHomes: false)
     let homeCommands = PreviewHomeCommands(store: store)
 
-    HomeTabView(store: store,
-                homeCommands: homeCommands)
+    HomeView(store: store,
+             homeCommands: homeCommands)
 }

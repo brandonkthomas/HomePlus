@@ -39,11 +39,17 @@ final class HomeStore {
     var selectedHome: HomeModel?
     
     // empty arrays are simpler than optional in our case here
+    /// Selected Home's Rooms
     var rooms: [RoomModel] = []
+    /// Selected Home's Accessories
     var accessories: [AccessoryModel] = []
+    /// Selected Home's Services
     var services: [ServiceModel] = []
+    /// Selected Home's Scenes
     var scenes: [SceneModel] = []
+    /// Selected Home's Cameras
     var cameras: [CameraModel] = []
+    /// Selected Home's Automations
     var automations: [AutomationModel] = []
 
     // what's our current state?

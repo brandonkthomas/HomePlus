@@ -32,11 +32,11 @@ struct ContentView: View {
     var body: some View {
         TabView {
             Tab("Home", systemImage: "house.fill") {
-                HomeTabView(store: store,
-                            homeCommands: homeCommands)
+                HomeView(store: store,
+                         homeCommands: homeCommands)
             }
             Tab("Cameras", systemImage: "camera.fill") {
-                CamerasTabView()
+                CamerasView()
             }
         }
         .tabBarMinimizeBehavior(TabBarMinimizeBehavior.onScrollDown) // added in iOS 26

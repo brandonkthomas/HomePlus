@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct CamerasTabView: View {
+struct CamerasView: View {
     var body: some View {
         ContentUnavailableView {
             Label("Coming Soon", systemImage: "clock.fill")
@@ -20,5 +20,5 @@ struct CamerasTabView: View {
 // MARK: Xcode Canvas Previews
 
 #Preview("Ready") {
-    CamerasTabView()
+    CamerasView()
 }
