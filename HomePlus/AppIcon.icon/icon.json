@@ -1,58 +1,67 @@
 {
-  "fill" : {
-    "solid" : "display-p3:1.00000,1.00000,1.00000,1.00000"
-  },
+  "fill" : "automatic",
   "groups" : [
     {
-      "hidden" : false,
       "layers" : [
         {
-          "fill-specializations" : [
-            {
-              "value" : {
-                "solid" : "display-p3:1.00000,0.63757,0.35629,1.00000"
-              }
-            },
-            {
-              "appearance" : "dark",
-              "value" : {
-                "solid" : "display-p3:1.00000,0.63757,0.35629,1.00000"
-              }
-            }
-          ],
-          "glass" : true,
-          "image-name" : "icon-HomePlus-top.png",
-          "name" : "icon-HomePlus-top",
+          "blend-mode" : "soft-light",
+          "fill" : {
+            "solid" : "display-p3:0.96631,0.77235,0.30615,1.00000"
+          },
+          "image-name" : "Door.png",
+          "name" : "Door",
+          "opacity" : 0.5,
           "position" : {
             "scale" : 0.45,
             "translation-in-points" : [
               0,
-              0
+              184.80925973684316
             ]
           }
         },
         {
-          "fill-specializations" : [
-            {
-              "value" : {
-                "solid" : "display-p3:1.00000,0.63757,0.35629,1.00000"
-              }
-            },
-            {
-              "appearance" : "dark",
-              "value" : {
-                "solid" : "display-p3:1.00000,0.63757,0.35629,1.00000"
-              }
-            }
-          ],
+          "fill" : {
+            "solid" : "display-p3:0.93555,0.62500,0.22498,1.00000"
+          },
           "glass" : true,
-          "image-name" : "icon-HomePlus-bottom.png",
-          "name" : "icon-HomePlus-bottom",
+          "image-name" : "House Front.png",
+          "name" : "House Front",
+          "opacity" : 0.5,
           "position" : {
             "scale" : 0.45,
             "translation-in-points" : [
               0,
-              0
+              80.18425973684293
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "display-p3:0.86670,0.45093,0.17627,1.00000"
+          },
+          "image-name" : "House Back.png",
+          "name" : "House Back",
+          "position" : {
+            "scale" : 0.45,
+            "translation-in-points" : [
+              0,
+              10.884259736843035
+            ]
+          }
+        },
+        {
+          "blend-mode" : "normal",
+          "fill" : {
+            "solid" : "display-p3:0.87842,0.47119,0.18591,1.00000"
+          },
+          "image-name" : "Chimney.png",
+          "name" : "Chimney",
+          "opacity" : 0.5,
+          "position" : {
+            "scale" : 0.45,
+            "translation-in-points" : [
+              190.57500000000005,
+              -15.66574026315692
             ]
           }
         }
