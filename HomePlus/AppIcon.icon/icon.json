@@ -4,11 +4,11 @@
   },
   "groups" : [
     {
+      "hidden" : false,
       "layers" : [
         {
-          "glass" : true,
-          "image-name" : "HomePlus-roof.svg",
-          "name" : "HomePlus-roof",
+          "image-name" : "icon-HomePlus-top.png",
+          "name" : "icon-HomePlus-top",
           "position" : {
             "scale" : 0.45,
             "translation-in-points" : [
@@ -18,8 +18,8 @@
           }
         },
         {
-          "image-name" : "HomePlus-bottom.svg",
-          "name" : "HomePlus-bottom",
+          "image-name" : "icon-HomePlus-bottom.png",
+          "name" : "icon-HomePlus-bottom",
           "position" : {
             "scale" : 0.45,
             "translation-in-points" : [
@@ -28,6 +28,19 @@
             ]
           }
         }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "layers" : [
+
       ],
       "shadow" : {
         "kind" : "neutral",
