@@ -117,6 +117,8 @@ struct ServiceRowView: View {
         }
     }
 
+    // MARK: Views
+
     /// ServiceRowView: icon/text/controls for a ServiceModel of any .type
     var body: some View {
         HStack {
