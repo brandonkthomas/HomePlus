@@ -50,7 +50,7 @@ final class HomeKitRepository:
 
     /// Shared logger
     private static let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "HomePlus",
+        subsystem: Bundle.main.bundleIdentifier ?? "Hearth",
         category: "HomeKitRepository"
     )
 

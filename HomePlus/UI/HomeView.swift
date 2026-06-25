@@ -39,7 +39,7 @@ struct HomeView: View {
     private var emptyStoreDescription: String {
         switch store.homeKitLoadState {
         case .unauthorized:
-            "HomePlus requires Apple Home access."
+            "Hearth requires Apple Home access."
         default:
             "You have no configured Homes."
         }
@@ -104,7 +104,7 @@ struct HomeView: View {
                     }
                 }
                 .listStyle(.insetGrouped)
-                .navigationTitle(store.selectedHome?.name ?? "HomePlus")
+                .navigationTitle(store.selectedHome?.name ?? "Hearth")
                 .navigationSubtitle(loadStateText) // added in iOS 26
                 .toolbar {
                     ToolbarItemGroup(placement: .primaryAction) {
