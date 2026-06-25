@@ -80,7 +80,8 @@ final class HomeKitRepository:
     
     // MARK: Functions
     
-    /// Selects a new Home & re-retrieves available Rooms.
+    /// Selects a new Home & re-retrieves available Rooms, Accessories, Services,
+    /// Scenes, & Cameras.
     ///
     /// HomeStore (internal mapping class) is the underlying updated class here.
     func selectHome(_ home: HomeModel) {

@@ -8,6 +8,7 @@
 import Foundation
 
 /// Mapping for HMService (a capability exposed by an HMAccessory)
+///
 /// Most user-facing interactable UI elements will be services; therefore this is mostly
 ///  used for direct UI interactions
 struct ServiceModel: Identifiable, Equatable {

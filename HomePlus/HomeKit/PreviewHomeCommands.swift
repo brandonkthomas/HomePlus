@@ -20,6 +20,8 @@ final class PreviewHomeCommands: HomeCommands {
 
     // MARK: Functions
 
+    /// Preview selection currently changes only selectedHome.
+    /// Production selection refreshes child collections through HomeKitRepository.
     func selectHome(_ home: HomeModel) {
         store.selectHome(home)
     }

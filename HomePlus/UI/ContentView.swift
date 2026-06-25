@@ -35,7 +35,7 @@ struct ContentView: View {
                 HomeView(store: store,
                          homeCommands: homeCommands)
             }
-            Tab("Cameras", systemImage: "camera.fill") {
+            Tab("Cameras", systemImage: "video.fill") {
                 CamerasView()
             }
         }

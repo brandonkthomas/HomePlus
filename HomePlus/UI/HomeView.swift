@@ -83,7 +83,8 @@ struct HomeView: View {
                         Section("Rooms") {
                             ForEach(store.rooms) { room in
                                 NavigationLink {
-                                    RoomDetailView(room: room)
+                                    RoomDetailView(room: room,
+                                                   services: store.services(in: room))
                                 } label: {
                                     Label(room.name, systemImage: "square.split.bottomrightquarter.fill")
                                 }
