@@ -125,14 +125,17 @@ struct ServiceRowView: View {
         }
     }
 
+    /// Have we met all required prerequisitites to be able to save Power changes?
     private var canWritePower: Bool {
         false
     }
 
+    /// Have we met all required prerequisitites to be able to save Brightness changes?
     private var canWriteBrightness: Bool {
         false
     }
 
+    /// Have we met all required prerequisitites to be able to save Position changes?
     private var canWritePosition: Bool {
         false
     }
@@ -161,7 +164,7 @@ struct ServiceRowView: View {
                     && service.values.isOn ?? false {
                     ValueBarView(value: service.values.brightness ?? 0,
                                  label: "Brightness",
-                                 color: .blue,
+                                 color: service.values.displayColor ?? .blue,
                                  isEnabled: canWriteBrightness)
                     .frame(width: 100) // slider takes up as much as it can; need to limit
                 }
@@ -170,7 +173,7 @@ struct ServiceRowView: View {
                 if service.capabilities.supportsPosition {
                     ValueBarView(value: service.values.position ?? 0,
                                  label: "Position",
-                                 color: .blue,
+                                 color: service.values.displayColor ?? .blue,
                                  isEnabled: canWritePosition)
                     .frame(width: 100) // slider takes up as much as it can; need to limit
                 }
@@ -179,7 +182,7 @@ struct ServiceRowView: View {
                 if service.capabilities.supportsPower {
                     ToggleView(isOn: service.values.isOn ?? false,
                                label: "Power",
-                               color: .blue,
+                               color: service.values.displayColor ?? .blue,
                                isEnabled: canWritePower)
                     .frame(width: 64)
                 }

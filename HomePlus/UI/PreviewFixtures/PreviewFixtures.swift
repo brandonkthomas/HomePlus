@@ -95,10 +95,13 @@ enum PreviewFixtures {
               isReachable: true,
               capabilities: .init(supportsPower: true,
                                   supportsBrightness: true,
+                                  supportsColor: true,
                                   supportsColorTemperature: true),
               values: .init(isOn: true,
-                            brightness: 70,
-                            temperature: 3500))
+                            brightness: 70,         // percent
+                            hue: 45,                // deg
+                            saturation: 70,         // percent
+                            colorTemperature: 370)) // mireds
     }
 
     /// Returns dummy ServiceModel: Power
@@ -113,10 +116,13 @@ enum PreviewFixtures {
               isReachable: false,
               capabilities: .init(supportsPower: true,
                                   supportsBrightness: true,
+                                  supportsColor: true,
                                   supportsColorTemperature: true),
               values: .init(isOn: nil,
-                            brightness: nil,
-                            temperature: nil))
+                            brightness: nil,        // percent
+                            hue: 45,                // deg
+                            saturation: 50,         // percent
+                            colorTemperature: nil)) // mireds
     }
 
     /// Returns dummy ServiceModel: Position

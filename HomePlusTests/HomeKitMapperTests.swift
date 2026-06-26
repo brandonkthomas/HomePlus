@@ -93,7 +93,7 @@ struct HomeKitMapperTests {
         #expect(serviceValues.brightness == nil)
     }
 
-    /// HomeKitMapper.serviceValues correctly returns position/temperature
+    /// HomeKitMapper.serviceValues correctly returns position/currentTemperature
     @Test func valuesSupportPositionTemperature() {
         let hmCharacteristicValues: [String: Any] = [
             HomeKitTypes.Characteristic.currentPosition: 45.0,
@@ -103,7 +103,22 @@ struct HomeKitMapperTests {
         let serviceValues = HomeKitMapper.serviceValues(from: hmCharacteristicValues)
 
         #expect(serviceValues.position == 45.0)
-        #expect(serviceValues.temperature == 21.5)
+        #expect(serviceValues.currentTemperature == 21.5)
+    }
+
+    /// HomeKitMapper.serviceValues correctly returns hue/saturation/colorTemperature
+    @Test func valuesSupportHueSaturationColorTemp() {
+        let hmCharacteristicValues: [String: Any] = [
+            HomeKitTypes.Characteristic.hue: 45.0,
+            HomeKitTypes.Characteristic.saturation: 21.5,
+            HomeKitTypes.Characteristic.colorTemperature: 30.0
+        ]
+
+        let serviceValues = HomeKitMapper.serviceValues(from: hmCharacteristicValues)
+
+        #expect(serviceValues.hue == 45.0)
+        #expect(serviceValues.saturation == 21.5)
+        #expect(serviceValues.colorTemperature == 30.0)
     }
 
     /// HomeKitMapper.serviceValues correctly returns defaults
@@ -114,7 +129,10 @@ struct HomeKitMapperTests {
 
         #expect(serviceValues.isOn == nil)
         #expect(serviceValues.brightness == nil)
+        #expect(serviceValues.hue == nil)
+        #expect(serviceValues.saturation == nil)
+        #expect(serviceValues.colorTemperature == nil)
         #expect(serviceValues.position == nil)
-        #expect(serviceValues.temperature == nil)
+        #expect(serviceValues.currentTemperature == nil)
     }
 }

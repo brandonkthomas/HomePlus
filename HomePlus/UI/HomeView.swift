@@ -58,7 +58,7 @@ struct HomeView: View {
     /// Toolbar item group: appends 1 selectable checkmark-visible button for each home in store.homes
     @ToolbarContentBuilder
     private var homeToolbarItem: some ToolbarContent {
-        ToolbarItemGroup(placement: .primaryAction) {
+        ToolbarItem(placement: .primaryAction) {
             Menu {
                 Menu {
                     ForEach(store.homes) { home in
@@ -76,10 +76,28 @@ struct HomeView: View {
                     Button {
 
                     } label: {
-                        Label("Add Home...", systemImage: "plus")
+                        Label("Add Home", systemImage: "plus")
                     }
                 } label: {
                     Label("Homes", systemImage: "house")
+                }
+                Menu {
+                    Button {
+
+                    } label: {
+                        Label("Add Room", systemImage: "plus")
+                    }
+                } label: {
+                    Label("Rooms", systemImage: "square.split.bottomrightquarter")
+                }
+                Menu {
+                    Button {
+
+                    } label: {
+                        Label("Add Accessory", systemImage: "plus")
+                    }
+                } label: {
+                    Label("Accessories", systemImage: "lightbulb")
                 }
                 Menu {
                     Button { } label: {
@@ -88,15 +106,19 @@ struct HomeView: View {
                 } label: {
                     Label("Settings", systemImage: "gear")
                 }
+                Divider()
+                Button {
+
+                } label: {
+                    Label("Home Info", systemImage: "info.circle")
+                }
+                Button {
+
+                } label: {
+                    Label("Help", systemImage: "questionmark.circle")
+                }
             } label: {
                 Image(systemName: "ellipsis")
-            }
-        }
-        ToolbarItemGroup(placement: .primaryAction) {
-            Button {
-
-            } label: {
-                Label("Room Info", systemImage: "info.circle")
             }
         }
     }
@@ -122,8 +144,17 @@ struct HomeView: View {
                                                        services: store.services(in: room))
                                         .navigationBarTitleDisplayMode(.inline)
                                     } label: {
-                                        Label(room.name,
-                                              systemImage: "square.split.bottomrightquarter.fill")
+                                        HStack {
+                                            Label(room.name,
+                                                  systemImage: "square.split.bottomrightquarter.fill")
+                                            Spacer()
+                                            let count = store.services(in: room).count
+                                            if count != 0 {
+                                                Text("\(count)")
+                                                    .foregroundStyle(.secondary)
+                                                    .font(.system(size: 14))
+                                            }
+                                        }
                                     }
                                 }
                             }

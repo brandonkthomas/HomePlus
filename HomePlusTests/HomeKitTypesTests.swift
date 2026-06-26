@@ -21,9 +21,13 @@ struct HomeKitTypesTests {
         #expect(observedTypes.contains(HomeKitTypes.Characteristic.powerState))
         #expect(observedTypes.contains(HomeKitTypes.Characteristic.active))
         #expect(observedTypes.contains(HomeKitTypes.Characteristic.brightness))
+        #expect(observedTypes.contains(HomeKitTypes.Characteristic.hue))
+        #expect(observedTypes.contains(HomeKitTypes.Characteristic.saturation))
+        #expect(observedTypes.contains(HomeKitTypes.Characteristic.colorTemperature))
         #expect(observedTypes.contains(HomeKitTypes.Characteristic.currentPosition))
         #expect(observedTypes.contains(HomeKitTypes.Characteristic.currentTemperature))
 
-        #expect(!observedTypes.contains(HomeKitTypes.Characteristic.hue))
+        #expect(!observedTypes.contains(HomeKitTypes.Characteristic.carbonDioxideDetected))
+        #expect(!observedTypes.contains(HomeKitTypes.Characteristic.contactSensorState))
     }
 }

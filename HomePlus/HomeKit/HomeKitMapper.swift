@@ -186,6 +186,18 @@ enum HomeKitMapper { // enum: pseudo-namespace since we do not need instances he
             valuesByType[HomeKitTypes.Characteristic.brightness]
         )
 
+        let hue: Double? = CharacteristicValue.double(
+            valuesByType[HomeKitTypes.Characteristic.hue]
+        )
+
+        let saturation: Double? = CharacteristicValue.double(
+            valuesByType[HomeKitTypes.Characteristic.saturation]
+        )
+
+        let colorTemperature: Double? = CharacteristicValue.double(
+            valuesByType[HomeKitTypes.Characteristic.colorTemperature]
+        )
+
         let currentPosition: Double? = CharacteristicValue.double(
             valuesByType[HomeKitTypes.Characteristic.currentPosition]
         )
@@ -196,7 +208,10 @@ enum HomeKitMapper { // enum: pseudo-namespace since we do not need instances he
 
         return .init(isOn: powerState ?? active,
                      brightness: brightness,
+                     hue: hue,
+                     saturation: saturation,
+                     colorTemperature: colorTemperature,
                      position: currentPosition,
-                     temperature: currentTemperature)
+                     currentTemperature: currentTemperature)
     }
 }

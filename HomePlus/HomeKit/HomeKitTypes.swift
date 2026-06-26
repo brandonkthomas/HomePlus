@@ -103,6 +103,9 @@ enum HomeKitTypes {
             Characteristic.powerState,
             Characteristic.active,
             Characteristic.brightness,
+            Characteristic.hue,
+            Characteristic.saturation,
+            Characteristic.colorTemperature,
             Characteristic.currentPosition,
             Characteristic.currentTemperature
         ]

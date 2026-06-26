@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI // for Color type
 
 /// Mapping for HMService (a capability exposed by an HMAccessory)
 ///
@@ -63,13 +64,21 @@ struct ServiceCapabilities: Equatable {
 /// What is this HMService doing right now?
 /// i.e. the current known state of a service
 struct ServiceValues: Equatable {
+    /// Expressed as On/Off Boolean
     var isOn: Bool? = nil
+
+    /// Expressed as a Percent
     var brightness: Double? = nil
+
+    /// Expressed as Degrees (360º)
     var hue: Double? = nil
+
+    /// Expressed as a Percent
     var saturation: Double? = nil
+
     var colorTemperature: Double? = nil
     var position: Double? = nil
-    var temperature: Double? = nil
+    var currentTemperature: Double? = nil
     var statusText: String? = nil
 
     // MARK: Computed Variables
@@ -77,5 +86,21 @@ struct ServiceValues: Equatable {
     /// Do we have a position value & is it greater than 0? (read-only)
     var hasOpenPosition: Bool {
         (position ?? 0) > 0
+    }
+
+    var displayColor: Color? {
+        guard let hue,
+              let saturation,
+              let brightness else {
+            return nil
+        }
+
+        let normalizedHue = hue / 360
+        let normalizedSaturation = saturation / 100
+        let normalizedBrightness = brightness / 100
+
+        return .init(hue: normalizedHue,
+                     saturation: normalizedSaturation,
+                     brightness: normalizedBrightness)
     }
 }
