@@ -8,6 +8,8 @@
 import SwiftUI
 
 /// Simple Slider w/ optional color & step
+///
+/// Created for use in ServiceRowView
 struct ValueBarView: View {
 
     // MARK: Properties

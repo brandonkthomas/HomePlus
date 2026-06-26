@@ -54,6 +54,10 @@ final class HomeKitRepository:
         category: "HomeKitRepository"
     )
 
+#if DEBUG
+    private var didLogInitialHomeKitSnapshot: Bool = false
+#endif
+
     // MARK: Properties (Calculated)
 
     /// Retrieve HomeStore's selected Home mapped to HomeKit.HMHome (calculated)
@@ -130,6 +134,12 @@ final class HomeKitRepository:
         } else {
             store.homeKitLoadState = .ready
         }
+
+#if DEBUG
+        if !didLogInitialHomeKitSnapshot {
+            logInitialHomeKitSnapshot()
+        }
+#endif
     }
 
     /// Inherited from HMHomeManagerDelegate.homeManager(_:didUpdate:).
@@ -290,6 +300,21 @@ final class HomeKitRepository:
         }
 
         refreshSelectedHomeServices(for: accessoryHome)
+
+#if DEBUG
+        Self.logger.info("ACCESSORY -- name=\(accessory.name, privacy: .public), id=\(accessory.uniqueIdentifier.uuidString, privacy: .public), reachable=\(accessory.isReachable)")
+        Self.logger.info("  SERVICE -- name=\(service.name, privacy: .public), type=\(service.serviceType, privacy: .public), id=\(service.uniqueIdentifier.uuidString, privacy: .public)")
+
+        let value = Self.debugDescription(characteristic.value)
+        let metadata = characteristic.metadata
+        let format = metadata?.format ?? "-"
+        let units = metadata?.units ?? "-"
+        let minimumValue = Self.debugDescription(metadata?.minimumValue)
+        let maximumValue = Self.debugDescription(metadata?.maximumValue)
+        let stepValue = Self.debugDescription(metadata?.stepValue)
+
+        Self.logger.info("    CHARACTERISTIC -- type=\(characteristic.characteristicType, privacy: .public), value=\(value, privacy: .public), format=\(format, privacy: .public), units=\(units, privacy: .public), min=\(minimumValue, privacy: .public), max=\(maximumValue, privacy: .public), step=\(stepValue, privacy: .public)")
+#endif
     }
 
     // MARK: Delegate Callbacks (HMRoom)
@@ -476,6 +501,8 @@ final class HomeKitRepository:
 
     /// Loop thru Accessory's Service's Characteristics
     /// & subscribe to notifications for those supported
+    ///
+    /// This will fire when a characteristic value changes
     private func enableNotifications(for accessory: HMAccessory) {
 
         for service in accessory.services {
@@ -496,6 +523,60 @@ final class HomeKitRepository:
 
             } // close: for char
         } // close: for service
-
     }
+
+    // MARK: Private Helpers (Logging)
+
+#if DEBUG
+    private func logInitialHomeKitSnapshot() {
+        guard let selectedHome = selectedHMHome else {
+            Self.logger.info("HOMEKIT SNAPSHOT -- no selected HomeKit home available")
+            return
+        }
+
+        Self.logger.info("HOMEKIT SNAPSHOT BEGIN -- home=\(selectedHome.name, privacy: .public), id=\(selectedHome.uniqueIdentifier.uuidString, privacy: .public)")
+
+        for room in selectedHome.rooms {
+            Self.logger.info("ROOM -- name=\(room.name, privacy: .public), id=\(room.uniqueIdentifier.uuidString, privacy: .public)")
+        }
+
+        for accessory in selectedHome.accessories {
+            let roomName = accessory.room?.name ?? "-"
+            Self.logger.info("ACCESSORY -- name=\(accessory.name, privacy: .public), id=\(accessory.uniqueIdentifier.uuidString, privacy: .public), room=\(roomName, privacy: .public), reachable=\(accessory.isReachable)")
+
+            for service in accessory.services {
+                Self.logger.info("  SERVICE -- name=\(service.name, privacy: .public), type=\(service.serviceType, privacy: .public), id=\(service.uniqueIdentifier.uuidString, privacy: .public)")
+
+                for characteristic in service.characteristics {
+                    let value = Self.debugDescription(characteristic.value)
+                    let metadata = characteristic.metadata
+                    let format = metadata?.format ?? "-"
+                    let units = metadata?.units ?? "-"
+                    let minimumValue = Self.debugDescription(metadata?.minimumValue)
+                    let maximumValue = Self.debugDescription(metadata?.maximumValue)
+                    let stepValue = Self.debugDescription(metadata?.stepValue)
+
+                    Self.logger.info("    CHARACTERISTIC -- type=\(characteristic.characteristicType, privacy: .public), value=\(value, privacy: .public), format=\(format, privacy: .public), units=\(units, privacy: .public), min=\(minimumValue, privacy: .public), max=\(maximumValue, privacy: .public), step=\(stepValue, privacy: .public)")
+                }
+            }
+        }
+
+        for actionSet in selectedHome.actionSets {
+            Self.logger.info("ACTION SET -- name=\(actionSet.name, privacy: .public), type=\(actionSet.actionSetType, privacy: .public), id=\(actionSet.uniqueIdentifier.uuidString, privacy: .public), actionCount=\(actionSet.actions.count)")
+        }
+
+        Self.logger.info("APP SNAPSHOT -- homes=\(self.store.homes.count), rooms=\(self.store.rooms.count), accessories=\(self.store.accessories.count), services=\(self.store.services.count), scenes=\(self.store.scenes.count), cameras=\(self.store.cameras.count)")
+        Self.logger.info("HOMEKIT SNAPSHOT END")
+
+        didLogInitialHomeKitSnapshot = true
+    }
+
+    private static func debugDescription(_ value: Any?) -> String {
+        guard let value else {
+            return "nil"
+        }
+
+        return String(describing: value)
+    }
+#endif
 }

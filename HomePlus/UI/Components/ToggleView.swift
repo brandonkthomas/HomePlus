@@ -8,6 +8,8 @@
 import SwiftUI
 
 /// Simple on/off Toggle w/ optional color
+///
+/// Created for use in ServiceRowView
 struct ToggleView: View {
 
     // MARK: Properties
