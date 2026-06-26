@@ -7,9 +7,17 @@
 
 import SwiftUI
 
+/// A control should be enabled only when all of these are true:
+///
+/// - The accessory/service is reachable
+/// - The service supports that capability
+/// - We have a current value to display
+/// - A command/write path exists for that capability
 struct ServiceRowView: View {
 
     let service: ServiceModel
+
+    // MARK: Properties (Private)
 
     // TODO: Modify symbols based on service state
     private var serviceImage: Image {
@@ -117,27 +125,63 @@ struct ServiceRowView: View {
         }
     }
 
+    private var canWritePower: Bool {
+        false
+    }
+
+    private var canWriteBrightness: Bool {
+        false
+    }
+
+    private var canWritePosition: Bool {
+        false
+    }
+
     // MARK: Views
 
     /// ServiceRowView: icon/text/controls for a ServiceModel of any .type
     var body: some View {
-        HStack {
-            serviceImage
-                .frame(width: 20)
-                .padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 5))
+        HStack(spacing: 12) {
+            Group {
+                serviceImage
+                    .frame(width: 20)
 
-            // most of the time, accessoryName and serviceName are identical
-            // in some cases an accessory may have a motion sensor, light, camera... we should
-            // show the service names given this behavior
-            Text(service.name)
-                .foregroundStyle(service.isReachable ? .primary : .secondary)
+                // most of the time, accessoryName and serviceName are identical
+                // in some cases an accessory may have a motion sensor, light, camera... we should
+                // show the service names given this behavior
+                Text(service.name)
+            }
+            .foregroundStyle(service.isReachable ? .primary : .secondary)
 
             Spacer()
 
             if service.isReachable {
-                // TODO: replace w/ Toggle
-                if !statusTexts.isEmpty {
-                    Text(statusTexts.joined(separator: " • "))
+                // Brightness
+                if service.capabilities.supportsBrightness
+                    && service.values.isOn ?? false {
+                    ValueBarView(value: service.values.brightness ?? 0,
+                                 label: "Brightness",
+                                 color: .blue,
+                                 isEnabled: canWriteBrightness)
+                    .frame(width: 100) // slider takes up as much as it can; need to limit
+                }
+
+                // Position
+                if service.capabilities.supportsPosition {
+                    ValueBarView(value: service.values.position ?? 0,
+                                 label: "Position",
+                                 color: .blue,
+                                 isEnabled: canWritePosition)
+                    .frame(width: 100) // slider takes up as much as it can; need to limit
+                }
+
+                // Power
+                if service.capabilities.supportsPower {
+                    ToggleView(isOn: service.values.isOn ?? false,
+                               label: "Power",
+                               color: .blue,
+                               isEnabled: canWritePower)
+                    .frame(width: 64)
                 }
             } else {
                 Image(systemName: "wifi.slash")
@@ -152,9 +196,12 @@ struct ServiceRowView: View {
 #Preview("Populated") {
     let store = PreviewFixtures.makeStore(homeKitLoadState: .ready)
 
-    ForEach(store.services, id: \.id) { service in
-        ServiceRowView(service: service)
+    List {
+        ForEach(store.services, id: \.id) { service in
+            ServiceRowView(service: service)
+        }
     }
+    .frame(width: 430)
 }
 
 #Preview("Unreachable") {
@@ -162,5 +209,9 @@ struct ServiceRowView: View {
     let accessory = PreviewFixtures.floorLampAccessory(roomID: room.id)
     let service = PreviewFixtures.unreachableLightService(roomID: room.id,
                                                           accessory: accessory)
-    ServiceRowView(service: service)
+
+    List {
+        ServiceRowView(service: service)
+    }
+    .frame(width: 430)
 }

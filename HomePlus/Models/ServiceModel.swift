@@ -65,6 +65,9 @@ struct ServiceCapabilities: Equatable {
 struct ServiceValues: Equatable {
     var isOn: Bool? = nil
     var brightness: Double? = nil
+    var hue: Double? = nil
+    var saturation: Double? = nil
+    var colorTemperature: Double? = nil
     var position: Double? = nil
     var temperature: Double? = nil
     var statusText: String? = nil

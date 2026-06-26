@@ -52,7 +52,9 @@ struct RoomDetailView: View {
             } else {
                 List {
                     Section {
-                        ForEach(services.sorted { $0.name < $1.name }) { service in
+                        ForEach(
+                            services.sorted { $0.accessoryName < $1.accessoryName
+                            }) { service in
                             ServiceRowView(service: service)
                         }
                     }
