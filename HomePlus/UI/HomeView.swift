@@ -127,13 +127,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if store.homes.isEmpty {
-                    ContentUnavailableView {
-                        Label(emptyStoreText, systemImage: emptyStoreImage)
-                    } description: {
-                        Text(emptyStoreDescription)
-                    }
-                } else {
+                if !store.homes.isEmpty {
                     List {
                         // Selected Home's Rooms
                         if !store.rooms.isEmpty {
@@ -162,9 +156,15 @@ struct HomeView: View {
                     }
                     .listStyle(.insetGrouped)
                     .navigationTitle(store.selectedHome?.name ?? "Hearth")
-                    #if DEBUG
+#if DEBUG
                     .navigationSubtitle(loadStateText) // added in iOS 26
-                    #endif
+#endif
+                } else {
+                    ContentUnavailableView {
+                        Label(emptyStoreText, systemImage: emptyStoreImage)
+                    } description: {
+                        Text(emptyStoreDescription)
+                    }
                 }
             }
             .toolbar {

@@ -65,7 +65,7 @@ struct ServiceRowView: View {
         }
     }
 
-    /// Computed status text for all
+    /// Computed status text for all values
     private var statusTexts: [String] {
         var texts: [String] = []
 
@@ -127,27 +127,27 @@ struct ServiceRowView: View {
 
     /// Have we met all required prerequisitites to be able to save Power changes?
     private var canWritePower: Bool {
-        false
+        false // TODO
     }
 
     /// Have we met all required prerequisitites to be able to save Brightness changes?
     private var canWriteBrightness: Bool {
-        false
+        false // TODO
     }
 
     /// Have we met all required prerequisitites to be able to save Position changes?
     private var canWritePosition: Bool {
-        false
+        false // TODO
     }
 
     // MARK: Views
 
     /// ServiceRowView: icon/text/controls for a ServiceModel of any .type
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 12) { // spacing between components
             Group {
                 serviceImage
-                    .frame(width: 20)
+                    .frame(width: 20) // fixed width for alignment's sake
 
                 // most of the time, accessoryName and serviceName are identical
                 // in some cases an accessory may have a motion sensor, light, camera... we should

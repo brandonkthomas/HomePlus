@@ -206,12 +206,24 @@ enum HomeKitMapper { // enum: pseudo-namespace since we do not need instances he
             valuesByType[HomeKitTypes.Characteristic.currentTemperature]
         )
 
+        var colorMode: ServiceColorMode? {
+            if let saturation,
+               saturation > 1 {
+                return .hueSaturation
+            } else if colorTemperature != nil {
+                return .colorTemperature
+            } else {
+                return nil
+            }
+        }
+
         return .init(isOn: powerState ?? active,
                      brightness: brightness,
                      hue: hue,
                      saturation: saturation,
                      colorTemperature: colorTemperature,
                      position: currentPosition,
-                     currentTemperature: currentTemperature)
+                     currentTemperature: currentTemperature,
+                     colorMode: colorMode)
     }
 }

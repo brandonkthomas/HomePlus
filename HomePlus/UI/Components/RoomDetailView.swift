@@ -43,13 +43,7 @@ struct RoomDetailView: View {
     /// Primary "Room Detail" view -- sub-view of "Home" tab
     var body: some View {
         Group {
-            if services.isEmpty {
-                ContentUnavailableView {
-                    Label("No Accessories", systemImage: "lightbulb.slash.fill")
-                } description: {
-                    Text("Accessories added to this room will appear here.")
-                }
-            } else {
+            if !services.isEmpty {
                 List {
                     Section {
                         ForEach(
@@ -60,6 +54,12 @@ struct RoomDetailView: View {
                     }
                 }
                 .listStyle(.insetGrouped)
+            } else {
+                ContentUnavailableView {
+                    Label("No Accessories", systemImage: "lightbulb.slash.fill")
+                } description: {
+                    Text("Accessories added to this room will appear here.")
+                }
             }
         }
         .navigationTitle(room.name)

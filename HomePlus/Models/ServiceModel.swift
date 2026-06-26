@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import SwiftUI // for Color type
 
 /// Mapping for HMService (a capability exposed by an HMAccessory)
 ///
@@ -76,31 +75,30 @@ struct ServiceValues: Equatable {
     /// Expressed as a Percent
     var saturation: Double? = nil
 
+    /// Expressed as Mireds
     var colorTemperature: Double? = nil
-    var position: Double? = nil
-    var currentTemperature: Double? = nil
-    var statusText: String? = nil
 
-    // MARK: Computed Variables
+    /// Expressed as Degrees (360º)
+    var position: Double? = nil
+
+    /// Expressed as Celsius (I think)
+    var currentTemperature: Double? = nil
+
+    /// unused...
+//    var statusText: String? = nil
+
+    /// Which color mode should we use given our values?
+    var colorMode: ServiceColorMode?
+
+    // MARK: ServiceValues: Computed
 
     /// Do we have a position value & is it greater than 0? (read-only)
     var hasOpenPosition: Bool {
         (position ?? 0) > 0
     }
+}
 
-    var displayColor: Color? {
-        guard let hue,
-              let saturation,
-              let brightness else {
-            return nil
-        }
-
-        let normalizedHue = hue / 360
-        let normalizedSaturation = saturation / 100
-        let normalizedBrightness = brightness / 100
-
-        return .init(hue: normalizedHue,
-                     saturation: normalizedSaturation,
-                     brightness: normalizedBrightness)
-    }
+enum ServiceColorMode: Equatable {
+    case hueSaturation
+    case colorTemperature
 }
