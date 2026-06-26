@@ -84,21 +84,10 @@ struct ServiceValues: Equatable {
     /// Expressed as Celsius (I think)
     var currentTemperature: Double? = nil
 
-    /// unused...
-//    var statusText: String? = nil
-
-    /// Which color mode should we use given our values?
-    var colorMode: ServiceColorMode?
-
     // MARK: ServiceValues: Computed
 
     /// Do we have a position value & is it greater than 0? (read-only)
     var hasOpenPosition: Bool {
         (position ?? 0) > 0
     }
-}
-
-enum ServiceColorMode: Equatable {
-    case hueSaturation
-    case colorTemperature
 }

@@ -119,7 +119,6 @@ struct HomeKitMapperTests {
         #expect(serviceValues.hue == 45.0)
         #expect(serviceValues.saturation == 21.5)
         #expect(serviceValues.colorTemperature == 30.0)
-        #expect(serviceValues.colorMode == .hueSaturation)
     }
 
     /// HomeKitMapper.serviceValues correctly returns defaults
@@ -135,6 +134,5 @@ struct HomeKitMapperTests {
         #expect(serviceValues.colorTemperature == nil)
         #expect(serviceValues.position == nil)
         #expect(serviceValues.currentTemperature == nil)
-        #expect(serviceValues.colorMode == nil)
     }
 }

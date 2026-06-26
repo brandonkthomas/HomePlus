@@ -294,7 +294,7 @@ final class HomeKitRepository:
     func accessory(_ accessory: HMAccessory,
                    service: HMService,
                    didUpdateValueFor characteristic: HMCharacteristic) {
-        guard let accessoryHome = accessory.home,
+        guard let accessoryHome: HMHome = accessory.home,
               accessoryHome.uniqueIdentifier == store.selectedHome?.id else {
             return
         }
