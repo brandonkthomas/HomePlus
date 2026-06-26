@@ -126,7 +126,10 @@ struct ServiceRowView: View {
                 .frame(width: 20)
                 .padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 5))
 
-            Text(service.accessoryName)
+            // most of the time, accessoryName and serviceName are identical
+            // in some cases an accessory may have a motion sensor, light, camera... we should
+            // show the service names given this behavior
+            Text(service.name)
                 .foregroundStyle(service.isReachable ? .primary : .secondary)
 
             Spacer()

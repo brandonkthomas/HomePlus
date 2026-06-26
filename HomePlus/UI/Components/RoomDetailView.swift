@@ -7,29 +7,62 @@
 
 import SwiftUI
 
+/// Primary "Room Detail" view -- sub-view of "Home" tab
 struct RoomDetailView: View {
 
     let room: RoomModel
     let services: [ServiceModel]
 
-    var body: some View {
-        if services.isEmpty {
-            ContentUnavailableView {
-                Label("No Accessories", systemImage: "lightbulb.slash.fill")
-            } description: {
-                Text("Accessories added to this room will appear here.")
+    @ToolbarContentBuilder
+    private var roomDetailToolbarItem: some ToolbarContent {
+        ToolbarItemGroup(placement: .primaryAction) {
+            Menu {
+                Button {
+
+                } label: {
+                    Label("Rename Room", systemImage: "pencil.line")
+                }
+                Button {
+
+                } label: {
+                    Label("Change Icon", systemImage: "paintbrush")
+                }
+            } label: {
+                Label("Settings", systemImage: "gear")
             }
-            .navigationTitle(room.name)
-        } else {
-            List {
-                Section {
-                    ForEach(services) { service in
-                        ServiceRowView(service: service)
+        }
+        ToolbarItemGroup(placement: .primaryAction) {
+            Button {
+
+            } label: {
+                Label("Room Info", systemImage: "info.circle")
+            }
+        }
+    }
+
+    /// Primary "Room Detail" view -- sub-view of "Home" tab
+    var body: some View {
+        Group {
+            if services.isEmpty {
+                ContentUnavailableView {
+                    Label("No Accessories", systemImage: "lightbulb.slash.fill")
+                } description: {
+                    Text("Accessories added to this room will appear here.")
+                }
+            } else {
+                List {
+                    Section {
+                        ForEach(services.sorted { $0.name < $1.name }) { service in
+                            ServiceRowView(service: service)
+                        }
                     }
                 }
+                .listStyle(.insetGrouped)
             }
-            .listStyle(.insetGrouped)
-            .navigationTitle(room.name)
+        }
+        .navigationTitle(room.name)
+        .toolbar {
+            roomDetailToolbarItem
         }
     }
 }

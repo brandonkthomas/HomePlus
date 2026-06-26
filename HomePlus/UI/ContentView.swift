@@ -40,6 +40,7 @@ struct ContentView: View {
             }
         }
         .tabBarMinimizeBehavior(TabBarMinimizeBehavior.onScrollDown) // added in iOS 26
+        .transition(.blurReplace) // 3
     }
 }
 

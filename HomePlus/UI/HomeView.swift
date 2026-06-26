@@ -55,62 +55,89 @@ struct HomeView: View {
         }
     }
 
-//    @ToolbarContentBuilder
-//    func toolbarItems() -> some ToolbarContent {
-//        ToolbarItem(placement: .primaryAction) {
-//            Button("Save") { /* Action */ }
-//        }
-//        ToolbarItem(placement: .cancellationAction) {
-//            Button("Cancel") { /* Action */ }
-//        }
-//    }
-
-    var body: some View {
-        NavigationStack {
-            if store.homes.isEmpty {
-                ContentUnavailableView {
-                    Label(emptyStoreText, systemImage: emptyStoreImage)
-                } description: {
-                    Text(emptyStoreDescription)
-                }
-            } else {
-                List {
-                    // All Homes
-                    Section("Homes") {
-                        ForEach(store.homes) { home in
-                            Button {
-                                // SwiftUI observes store.selectedHome + redraws view on change
-                                homeCommands.selectHome(home)
-                            } label: {
-                                let isSelected = home.id == store.selectedHome?.id
-                                HomeRowView(home: home, isSelected: isSelected)
+    /// Toolbar item group: appends 1 selectable checkmark-visible button for each home in store.homes
+    @ToolbarContentBuilder
+    private var homeToolbarItem: some ToolbarContent {
+        ToolbarItemGroup(placement: .primaryAction) {
+            Menu {
+                Menu {
+                    ForEach(store.homes) { home in
+                        Button {
+                            homeCommands.selectHome(home)
+                        } label: {
+                            if home.id == store.selectedHome?.id {
+                                Label(home.name, systemImage: "checkmark")
+                            } else {
+                                Text(home.name)
                             }
                         }
                     }
+                    Divider()
+                    Button {
 
-                    // Selected Home's Rooms
-                    if !store.rooms.isEmpty {
-                        Section("Rooms") {
-                            ForEach(store.rooms) { room in
-                                NavigationLink {
-                                    RoomDetailView(room: room,
-                                                   services: store.services(in: room))
-                                    .navigationBarTitleDisplayMode(.inline)
-                                } label: {
-                                    Label(room.name, systemImage: "square.split.bottomrightquarter.fill")
+                    } label: {
+                        Label("Add Home...", systemImage: "plus")
+                    }
+                } label: {
+                    Label("Homes", systemImage: "house")
+                }
+                Menu {
+                    Button { } label: {
+                        Label("Rename Home", systemImage: "pencil.line")
+                    }
+                } label: {
+                    Label("Settings", systemImage: "gear")
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+            }
+        }
+        ToolbarItemGroup(placement: .primaryAction) {
+            Button {
+
+            } label: {
+                Label("Room Info", systemImage: "info.circle")
+            }
+        }
+    }
+
+    /// Primary "Home" tab view
+    var body: some View {
+        NavigationStack {
+            Group {
+                if store.homes.isEmpty {
+                    ContentUnavailableView {
+                        Label(emptyStoreText, systemImage: emptyStoreImage)
+                    } description: {
+                        Text(emptyStoreDescription)
+                    }
+                } else {
+                    List {
+                        // Selected Home's Rooms
+                        if !store.rooms.isEmpty {
+                            Section("Rooms") {
+                                ForEach(store.rooms.sorted { $0.name < $1.name }) { room in
+                                    NavigationLink {
+                                        RoomDetailView(room: room,
+                                                       services: store.services(in: room))
+                                        .navigationBarTitleDisplayMode(.inline)
+                                    } label: {
+                                        Label(room.name,
+                                              systemImage: "square.split.bottomrightquarter.fill")
+                                    }
                                 }
                             }
                         }
                     }
+                    .listStyle(.insetGrouped)
+                    .navigationTitle(store.selectedHome?.name ?? "Hearth")
+                    #if DEBUG
+                    .navigationSubtitle(loadStateText) // added in iOS 26
+                    #endif
                 }
-                .listStyle(.insetGrouped)
-                .navigationTitle(store.selectedHome?.name ?? "Hearth")
-                .navigationSubtitle(loadStateText) // added in iOS 26
-                .toolbar {
-                    ToolbarItemGroup(placement: .primaryAction) {
-                        Image(systemName: "ellipsis")
-                    }
-                }
+            }
+            .toolbar {
+                homeToolbarItem
             }
         }
     }
