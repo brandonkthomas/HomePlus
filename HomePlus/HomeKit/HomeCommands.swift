@@ -19,12 +19,26 @@ import SwiftUI
 ///   SwiftUI observes HomeStore and redraws
 protocol HomeCommands {
     func selectHome(_ home: HomeModel)
+
+    func setPower(_ isOn: Bool,
+                  for serviceID: ServiceModel.ID) async throws
+}
+
+enum HomeCommandError: Error {
+    case missingImplementation
+    case serviceNotFound
+    case unsupportedOperation
 }
 
 /// Fallback used when a view reads HomeCommands without an injected implementation
 private struct MissingHomeCommands: HomeCommands {
     func selectHome(_ home: HomeModel) {
         assertionFailure("Missing HomeCommands environment value")
+    }
+
+    func setPower(_ isOn: Bool, for serviceID: ServiceModel.ID) async throws {
+        assertionFailure("Missing HomeCommands environment value")
+        throw HomeCommandError.missingImplementation
     }
 }
 

@@ -99,6 +99,11 @@ final class HomeKitRepository:
         }
     }
 
+    ///
+    func setPower(_ isOn: Bool, for serviceID: ServiceModel.ID) async throws {
+        
+    }
+
     // MARK: Delegate Callbacks (HMHomeManager)
 
     /// Fired when the manager has loaded / changed its list of Homes.

@@ -25,4 +25,24 @@ final class PreviewHomeCommands: HomeCommands {
     func selectHome(_ home: HomeModel) {
         store.selectHome(home)
     }
+
+    ///
+    func setPower(_ isOn: Bool,
+                  for serviceID: ServiceModel.ID) async throws {
+        let serviceIndex = store.services.firstIndex(where: { service in
+            service.id == serviceID
+        })
+
+        guard let index = serviceIndex else {
+            throw HomeCommandError.serviceNotFound
+        }
+
+        guard store.services[index].capabilities.supportsPower else {
+            throw HomeCommandError.unsupportedOperation
+        }
+
+        // Prod will NEVER modify HomeStore!
+        // Preview is our exception.
+        store.services[index].values.isOn = isOn
+    }
 }

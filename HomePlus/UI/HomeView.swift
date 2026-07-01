@@ -82,6 +82,14 @@ struct HomeView: View {
                     Label("Homes", systemImage: "house")
                 }
                 Menu {
+                    ForEach(store.rooms) { room in
+                        Button {
+
+                        } label: {
+                            Label(room.name, systemImage: "square.split.bottomrightquarter")
+                        }
+                    }
+                    Divider()
                     Button {
 
                     } label: {

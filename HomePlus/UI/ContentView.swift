@@ -14,7 +14,7 @@ struct ContentView: View {
 
     /// Read appEnvironment.store environment value from current view environment
     ///
-    /// Don't need "\." here because this is a type-based lookup for an observable object
+    /// Don't need "\." here because this is a type-based lookup for an observable instance
     /// placed into the environment: .environment(store))
     @Environment(HomeStore.self) private var store: HomeStore
 
@@ -23,6 +23,8 @@ struct ContentView: View {
     /// Need "\." because this is a key-path lookup for a custom environment value:
     /// .environment(\.homeCommands, commands)
     @Environment(\.homeCommands) private var homeCommands: any HomeCommands
+
+    @State private var tabSelection = 0
 
     // MARK: Views
 
@@ -40,7 +42,7 @@ struct ContentView: View {
             }
         }
         .tabBarMinimizeBehavior(TabBarMinimizeBehavior.onScrollDown) // added in iOS 26
-        .transition(.blurReplace) // 3
+        .animation(.easeOut(duration: 0.2), value: tabSelection)
     }
 }
 
