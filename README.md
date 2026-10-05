@@ -7,6 +7,8 @@
     </picture>
   </a>
 
+  <h3 align="center">HomePlus</h3>
+
   <p align="center">
     Simple iOS HomeKit controller application.
     <br />
