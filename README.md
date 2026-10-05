@@ -4,6 +4,8 @@
   <p align="center">
     Simple iOS HomeKit controller application.
     <br />
+    Unfinished concept / first Swift project. No further updates are planned at this time.
+    <br />
     <br />
     <a href="https://swift.org"><img alt=".NET Core" src="https://img.shields.io/badge/Swift-F05138?logo=swift&logoColor=white"></a>
   </p>
